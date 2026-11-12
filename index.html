@@ -103,6 +103,10 @@ h1{font-weight:900;font-size:32px;line-height:1.05;margin:6px 0 0;letter-spacing
 /* Rangos */
 .ranges{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--track);padding:4px;border-radius:16px}
 .ranges button{height:42px;border:0;border-radius:12px;background:transparent;font-weight:800;font-size:14px;cursor:pointer;color:var(--muted)}
+.ranges button,.switch button{position:relative}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp+.grp{border-top:1px solid #EEE9F7;padding-top:10px}
+.grp>small{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between}
 .ranges button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(60,40,140,.1)}
 
 /* Grilla */
@@ -265,7 +269,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     </header>
 
     <div class="summary">
-      <div class="chips" id="formChips"></div>
+      <div id="formChips" style="display:flex;flex-direction:column;gap:10px"></div>
       <div class="row"><span id="formCount"></span><b id="formTotal"></b></div>
       <div class="by"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Vendido por <b id="formSeller"></b></div>
     </div>
@@ -325,7 +329,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     </div>
     <div class="rb">
       <div class="ok"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Compra registrada</div>
-      <div class="chips" id="rChips"></div>
+      <div id="rChips" style="display:flex;flex-direction:column;gap:10px"></div>
       <div class="kv" id="rData"></div>
       <div class="cut"></div>
       <div class="tot"><span>Total</span><b id="rTotal"></b></div>
@@ -354,7 +358,7 @@ const VENDEDORES = [
 ];
 // img: deja '' para usar el ícono; cuando tengas la foto pon la ruta, ej: 'img/canasta.jpg'
 const RIFAS = [
-  { id:'r1', nombre:'Rifa Canasta', corto:'Rifa 1', sorteo:'[FECHA]', premios:[
+  { id:'r1', nombre:'Rifa Canasta', corto:'Canasta', sorteo:'[FECHA]', premios:[
     { nombre:'Canasta básica familiar', icono:'canasta', img:'' },
     { nombre:'Parlante Bluetooth', icono:'parlante', img:'' },
     { nombre:'Batidora de mano eléctrica', icono:'batidora', img:'' },
@@ -478,11 +482,12 @@ function renderGrid(i){
   $('#prog'+i).textContent = `${vend} de ${TOTAL_NUMEROS} vendidos`;
 }
 
+function cart(){ return RIFAS.map(r => ({ r, nums: mine(r) })).filter(g => g.nums.length); }
 function renderDock(){
-  const r = RIFAS[active], sel = mine(r);
-  $('#dockCount').textContent = `${r.corto} · ` + (sel.length === 0 ? 'ningún número' : `${sel.length} ${sel.length===1?'número':'números'}`);
-  $('#dockTotal').textContent = fmt(sel.length * PRECIO);
-  $('#buyBtn').disabled = sel.length === 0;
+  const c = cart(), total = c.reduce((a,g)=>a+g.nums.length, 0);
+  $('#dockCount').textContent = total === 0 ? 'Ningún número elegido' : c.map(g => `${g.r.corto} ${g.nums.length}`).join(' · ');
+  $('#dockTotal').textContent = fmt(total * PRECIO);
+  $('#buyBtn').disabled = total === 0;
 }
 
 function renderAll(){ purge(); RIFAS.forEach((_,i)=>renderGrid(i)); renderDock(); }
@@ -576,14 +581,18 @@ document.querySelectorAll('input[name=canal]').forEach(inp => {
   inp.nextElementSibling.addEventListener('click', e => { if (inp.checked){ e.preventDefault(); inp.checked = false; } });
 });
 
+function groupsHTML(c, color){
+  return c.map(g => `<div class="grp"><small><span>${esc(g.r.nombre)}</span><span>${fmt(g.nums.length*PRECIO)}</span></small>
+    <div class="chips">${g.nums.map(n=>`<span class="chip" style="background:${color}">${pad(n)}</span>`).join('')}</div></div>`).join('');
+}
 function openForm(){
   if (!vendedor){ needSeller(); return; }
-  const r = RIFAS[active], sel = mine(r);
-  if (!sel.length) return;
-  $('#formRifa').textContent = r.nombre;
-  $('#formChips').innerHTML = sel.map(n=>`<span class="chip">${pad(n)}</span>`).join('');
-  $('#formCount').textContent = `${sel.length} × ${fmt(PRECIO)}`;
-  $('#formTotal').textContent = fmt(sel.length*PRECIO);
+  const c = cart(), total = c.reduce((a,g)=>a+g.nums.length, 0);
+  if (!total) return;
+  $('#formRifa').textContent = 'Resumen de la compra';
+  $('#formChips').innerHTML = groupsHTML(c, 'var(--mine)');
+  $('#formCount').textContent = `${total} × ${fmt(PRECIO)}`;
+  $('#formTotal').textContent = fmt(total*PRECIO);
   $('#formSeller').textContent = vendedor;
   document.querySelectorAll('.field').forEach(f=>f.classList.remove('bad'));
   $('#formVeil').classList.add('open');
@@ -608,31 +617,34 @@ $('#buyForm').addEventListener('submit', e => {
   if (!ok.nombre || !ok.telefono || !ok.estado) return;
 
   db = load(); purge();
-  const r = RIFAS[active], st = db.rifas[r.id];
-  const sel = Object.keys(st.pending).filter(n => st.pending[n].by === me).map(Number).sort((a,b)=>a-b);
-  if (!sel.length){ toast('Tu reserva expiró, vuelve a elegir'); $('#formVeil').classList.remove('open'); renderAll(); return; }
+  const c = cart();
+  if (!c.length){ toast('Tu reserva expiró, vuelve a elegir'); $('#formVeil').classList.remove('open'); renderAll(); return; }
 
-  const folio = r.id.toUpperCase() + '-' + Date.now().toString(36).slice(-5).toUpperCase();
-  const venta = {
-    fecha: new Date().toLocaleString('es-CL'),
-    rifa: r.nombre, numeros: sel.map(pad).join(', '), vendedor, comprador: nombre, telefono, estado,
+  const folio = 'RC-' + Date.now().toString(36).slice(-6).toUpperCase();
+  const base = {
+    fecha: new Date().toLocaleString('es-CL'), vendedor, comprador: nombre, telefono, estado,
     contacto_preferido: (document.querySelector('input[name=canal]:checked')||{}).value || '',
-    mensaje: $('#mensaje').value.trim(), total: sel.length*PRECIO, folio
+    mensaje: $('#mensaje').value.trim(), folio
   };
-  sel.forEach(n => { delete st.pending[n]; st.sold[n] = { vendedor, folio, estado }; });
-  db.ventas.push(venta); save();
+  // una fila por rifa (mismo folio), así queda ordenado en la planilla
+  c.forEach(g => {
+    const st = db.rifas[g.r.id];
+    g.nums.forEach(n => { delete st.pending[n]; st.sold[n] = { vendedor, folio, estado }; });
+    db.ventas.push({ ...base, rifa: g.r.nombre, numeros: g.nums.map(pad).join(', '), total: g.nums.length*PRECIO });
+  });
+  save();
 
   $('#formVeil').classList.remove('open');
   $('#buyForm').reset();
   renderAll();
-  showReceipt(venta, sel);
+  showReceipt({ ...base, total: c.reduce((a,g)=>a+g.nums.length,0)*PRECIO }, c);
 });
 
 /* ================== COMPROBANTE ================== */
-function showReceipt(v, nums){
-  $('#rRifa').textContent = v.rifa;
+function showReceipt(v, c){
+  $('#rRifa').textContent = 'Rifa Coloquios';
   $('#rFolio').innerHTML = `Folio<br>${esc(v.folio)}`;
-  $('#rChips').innerHTML = nums.map(n=>`<span class="chip" style="background:var(--accent)">${pad(n)}</span>`).join('');
+  $('#rChips').innerHTML = groupsHTML(c, 'var(--accent)');
   const rows = [['Comprador',v.comprador],['Contacto',v.telefono],['Pago',v.estado]];
   if (v.contacto_preferido) rows.push(['Prefiere', v.contacto_preferido]);
   if (v.mensaje) rows.push(['Mensaje', v.mensaje]);
