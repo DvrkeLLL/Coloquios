@@ -1,0 +1,14 @@
+{
+  "name": "Rifa Coloquios",
+  "short_name": "Rifa Coloquios",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    { "src": "icono_coloquios.PNG", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icono_coloquios.PNG", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icono_coloquios.PNG", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

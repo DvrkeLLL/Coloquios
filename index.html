@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<title>Rifa Coloquios</title>
+<!-- Ícono (pestaña de Chrome, pantalla de inicio en iOS y Android) -->
+<link rel="icon" type="image/png" href="icono_coloquios.PNG">
+<link rel="shortcut icon" href="icono_coloquios.PNG">
+<link rel="apple-touch-icon" href="icono_coloquios.PNG">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Rifa Coloquios">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Rifa Coloquios">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#231B3A; --muted:#6E6688; --surface:#FFFFFF;
+  --mine:#19824A; --pending:#FFC93C; --soldBg:#E6E1EE; --soldFg:#A29BB5;
+  --r:24px; --cr:16px;
+  --font:Nunito, system-ui, -apple-system, sans-serif;
+}
+/* Tema por rifa */
+body[data-rifa="0"]{ --bg:#FFFFFF; --track:#F0EEF5; --line:#E6E2EF; --accent:#6D4AE8; --accentSoft:#EFEBFA; }
+/* En fondo blanco, las tarjetas blancas llevan un borde suave para distinguirse */
+body[data-rifa="0"] .n:not(.mine):not(.pending):not(.sold),
+body[data-rifa="0"] .prize, body[data-rifa="0"] .progress, body[data-rifa="0"] .pick>button,
+body[data-rifa="0"] .summary, body[data-rifa="0"] .choices label{box-shadow:inset 0 0 0 1.5px #ECE8F3}
+body[data-rifa="0"] .inp, body[data-rifa="0"] .phone{border-color:#ECE8F3}
+body[data-rifa="0"] .inp:focus, body[data-rifa="0"] .phone:focus-within{border-color:var(--accent)}
+body[data-rifa="1"]{ --bg:#F1EEFA; --track:#E2DCF3; --line:#D8D0EE; --accent:#5B3CC4; --accentSoft:#E3DBFA; }
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);transition:background-color .35s ease}
+button,input,textarea{font:inherit;color:inherit}
+.app{max-width:480px;margin:0 auto;min-height:100dvh;padding-bottom:116px}
+svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* Encabezado */
+.top{padding:22px 20px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:900;font-size:32px;line-height:1.05;margin:6px 0 0;letter-spacing:-.02em}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:52px;height:52px;border-radius:14px;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(60,40,140,.12)}
+.iconbtn{width:44px;height:44px;display:grid;place-items:center;border:0;background:var(--surface);border-radius:14px;cursor:pointer;box-shadow:0 2px 8px rgba(60,40,140,.08)}
+.pick{position:relative;margin:14px 20px 0;z-index:25}
+.pick>button{width:100%;height:52px;display:flex;align-items:center;gap:10px;padding:0 14px 0 8px;border:2px solid transparent;background:var(--surface);border-radius:18px;font-size:15px;font-weight:800;cursor:pointer;text-align:left;box-shadow:0 2px 8px rgba(60,40,140,.06)}
+.pick .av{width:36px;height:36px;border-radius:50%;background:var(--accentSoft);color:var(--accent);display:grid;place-items:center;font-size:13px;font-weight:900;flex-shrink:0}
+.pick .txt{flex:1;display:flex;flex-direction:column;line-height:1.15}
+.pick .txt small{font-size:12px;font-weight:700;color:var(--muted)}
+.pick .chev{transition:transform .2s;color:var(--muted)}
+.pick.open .chev{transform:rotate(180deg)}
+.pick.need>button{border-color:#C42B2B;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pick ul{list-style:none;margin:6px 0 0;padding:6px;position:absolute;left:0;right:0;background:var(--surface);border-radius:18px;box-shadow:0 12px 30px rgba(35,27,58,.18);display:none;max-height:60vh;overflow:auto}
+.pick.open ul{display:block}
+.pick li button{width:100%;height:46px;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;background:none;border-radius:12px;font-size:15px;font-weight:700;text-align:left;cursor:pointer}
+.pick li button .av{width:30px;height:30px;font-size:11px}
+.pick li button[aria-checked=true]{background:var(--accentSoft);color:var(--accent)}
+.pick li button svg{margin-left:auto;opacity:0}
+.pick li button[aria-checked=true] svg{opacity:1}
+.menu{position:absolute;right:20px;top:70px;background:var(--surface);border-radius:18px;min-width:230px;z-index:30;display:none;overflow:hidden;box-shadow:0 12px 30px rgba(35,27,58,.18)}
+.menu.open{display:block}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;height:50px;padding:0 16px;border:0;background:none;text-align:left;cursor:pointer;font-size:15px;font-weight:600}
+.menu button+button{border-top:1px solid #EEE9F7}
+
+/* Selector de rifa */
+.switch{margin:16px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--track);padding:4px;border-radius:18px;transition:background-color .35s}
+.switch button{height:44px;border:0;border-radius:14px;background:transparent;font-weight:800;font-size:15px;cursor:pointer;color:var(--muted)}
+.switch button.on{background:var(--surface);color:var(--ink);box-shadow:0 2px 6px rgba(60,40,140,.1)}
+.hint{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);padding:8px 0 0}
+.hint svg{width:14px;height:14px}
+
+/* Carrusel */
+.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.track::-webkit-scrollbar{display:none}
+.panel{flex:0 0 100%;scroll-snap-align:start;padding:16px 20px 0;display:flex;flex-direction:column;gap:18px}
+
+/* Premios 2x2 */
+.sec{display:flex;justify-content:space-between;align-items:baseline}
+.sec h2{margin:0;font-size:22px;font-weight:900}
+.sec span{font-size:13px;color:var(--muted);font-weight:600}
+.prizes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.prize{position:relative;aspect-ratio:1/1;background:var(--surface);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(60,40,140,.06)}
+.prize .pic{flex:1;display:grid;place-items:center;background:var(--accentSoft);margin:8px 8px 0;border-radius:18px;color:var(--accent);overflow:hidden}
+.prize .pic svg{width:48px;height:48px;stroke-width:1.6}
+.prize .pic img{width:100%;height:100%;object-fit:cover}
+.prize .pos{position:absolute;top:14px;left:14px;width:28px;height:28px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:14px;font-weight:900;color:var(--ink)}
+.prize p{margin:0;padding:8px 12px 12px;font-size:13px;font-weight:800;line-height:1.2;min-height:48px;display:flex;align-items:center}
+
+.progress{background:var(--surface);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.progress .bar{height:10px;background:var(--track);border-radius:99px;overflow:hidden}
+.progress .bar span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.progress p{margin:0;font-size:14px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between}
+.progress p b{color:var(--ink)}
+
+/* Rangos */
+.ranges{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--track);padding:4px;border-radius:16px}
+.ranges button{height:42px;border:0;border-radius:12px;background:transparent;font-weight:800;font-size:14px;cursor:pointer;color:var(--muted)}
+.ranges button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(60,40,140,.1)}
+
+/* Grilla */
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.n{height:52px;border:0;background:var(--surface);border-radius:var(--cr);font-weight:800;font-size:17px;cursor:pointer;font-variant-numeric:tabular-nums;box-shadow:0 2px 6px rgba(60,40,140,.07);transition:transform .08s}
+.n:active{transform:scale(.92)}
+.n.mine{background:var(--mine);color:#fff;box-shadow:0 4px 10px rgba(25,130,74,.3)}
+.n.pending{background:var(--pending);color:var(--ink);cursor:not-allowed}
+.n.sold{background:var(--soldBg);color:var(--soldFg);text-decoration:line-through;cursor:not-allowed;box-shadow:none}
+
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:16px;height:16px;border-radius:6px;display:inline-block}
+
+/* Barra inferior */
+.dock{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:20}
+.dock .in{max-width:456px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--ink);color:#fff;border-radius:24px;padding:12px 12px 12px 20px;box-shadow:0 12px 30px rgba(35,27,58,.3)}
+.dock small{display:block;font-size:13px;font-weight:600;opacity:.75}
+.dock strong{font-size:28px;font-weight:900;line-height:1.05}
+.btn{height:52px;padding:0 22px;border:0;border-radius:18px;background:var(--accent);color:#fff;font-weight:800;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.btn:disabled{background:#4A4262;color:#A9A2C0;cursor:not-allowed}
+.btn.full{width:100%}
+.btn.dark{background:var(--ink)}
+
+/* Hojas y diálogos */
+.veil{position:fixed;inset:0;background:rgba(35,27,58,.45);z-index:40;display:none;align-items:flex-end;justify-content:center}
+.veil.open{display:flex}
+.veil.center{align-items:center}
+.sheet{background:var(--bg);width:100%;max-width:480px;max-height:92dvh;overflow:auto;border-radius:28px 28px 0 0;padding:18px 20px calc(20px + env(safe-area-inset-bottom));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.sheet header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
+.sheet h3{margin:4px 0 0;font-size:28px;font-weight:900;line-height:1.05}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-width:52px;height:36px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;background:var(--mine);color:#fff;font-weight:800;font-size:15px;border-radius:12px;font-variant-numeric:tabular-nums}
+.summary{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+.summary .row{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;font-weight:600;color:var(--muted)}
+.summary .row b{font-size:26px;font-weight:900;color:var(--ink)}
+.summary .by{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);border-top:1px solid #EEE9F7;padding-top:12px}
+.summary .by b{color:var(--ink)}
+form{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field>label,.field>.lbl{font-size:14px;font-weight:800}
+.field .opt{font-weight:600;color:var(--muted)}
+.inp{height:52px;padding:0 16px;border:2px solid transparent;border-radius:16px;background:var(--surface);font-size:16px;font-weight:600;outline:none}
+.inp::placeholder{color:#A9A2C0;font-weight:500}
+.inp:focus{border-color:var(--accent)}
+textarea.inp{height:88px;padding:12px 16px;resize:none}
+.phone{display:flex;align-items:center;height:52px;border:2px solid transparent;border-radius:16px;background:var(--surface);overflow:hidden}
+.phone:focus-within{border-color:var(--accent)}
+.phone .pre{padding:0 4px 0 16px;font-size:16px;font-weight:800;color:var(--ink);white-space:nowrap}
+.phone input{flex:1;min-width:0;height:100%;border:0;background:none;outline:none;font-size:16px;font-weight:600;padding:0 16px 0 4px;letter-spacing:.02em}
+.phone input::placeholder{color:#A9A2C0;font-weight:500}
+.field.bad .phone{border-color:#C42B2B}
+.choices.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.choices.two label{flex-direction:row;min-height:52px;font-size:14px;gap:8px}
+.choices.two input:checked+label.paid{border-color:var(--mine);color:var(--mine);background:#E3F4EA}
+.choices.two input:checked+label.unpaid{border-color:#B7791F;color:#8A5A0F;background:#FFF4D6}
+.err{font-size:13px;font-weight:700;color:#C42B2B;display:none}
+.field.bad .err{display:block}
+.field.bad .inp{border-color:#C42B2B}
+.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.choices input{position:absolute;opacity:0;pointer-events:none}
+.choices label{min-height:64px;padding:8px 4px;background:var(--surface);border:2px solid transparent;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:700;text-align:center;cursor:pointer}
+.choices input:checked+label{border-color:var(--accent);color:var(--accent);background:var(--accentSoft)}
+.choices input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Comprobante */
+.receipt{width:100%;max-width:380px;margin:auto 16px;background:var(--surface);border-radius:28px;overflow:hidden;animation:up .25s ease-out}
+.receipt .rh{background:var(--accent);color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.receipt .rh .eyebrow{color:rgba(255,255,255,.8)}
+.receipt .rh h4{margin:4px 0 0;font-size:28px;font-weight:900;line-height:1}
+.receipt .rh span{font-size:12px;font-weight:700;opacity:.85;text-align:right}
+.receipt .rb{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.receipt .ok{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mine);font-weight:800}
+.receipt .kv{display:grid;grid-template-columns:100px 1fr;gap:8px 12px;font-size:14px}
+.receipt .kv span{color:var(--muted);font-weight:600}
+.receipt .kv b{font-weight:800;word-break:break-word}
+.cut{position:relative;height:0;border-top:2px dashed var(--line);margin:4px -20px}
+.cut::before,.cut::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:rgba(35,27,58,.45)}
+.cut::before{left:-11px}.cut::after{right:-11px}
+.receipt .tot{display:flex;justify-content:space-between;align-items:baseline}
+.receipt .tot span{font-size:14px;color:var(--muted);font-weight:700}
+.receipt .tot b{font-size:34px;font-weight:900}
+.receipt .note{font-size:13px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.receipt .note svg{width:16px;height:16px}
+.receipt .rf{padding:0 20px 20px}
+
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 16px;border-radius:16px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.proto{margin:24px 20px 0;padding:12px 14px;border:2px dashed var(--line);border-radius:16px;font-size:13px;font-weight:600;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body data-rifa="0">
+<div class="app">
+
+  <div class="top">
+    <div class="brand">
+      <img class="logo" src="icono_coloquios.PNG" alt="" onerror="this.remove()">
+      <div>
+        <div class="eyebrow">Coloquios · Rifa solidaria</div>
+        <h1>Rifa Coloquios</h1>
+      </div>
+    </div>
+    <button class="iconbtn" id="menuBtn" aria-label="Opciones" aria-expanded="false">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="menu" id="menu" role="menu">
+      <button id="exportBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar ventas (CSV)</button>
+      <button id="resetBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reiniciar prueba</button>
+    </div>
+  </div>
+
+  <div class="pick" id="pick">
+    <button id="pickBtn" aria-haspopup="listbox" aria-expanded="false">
+      <span class="av" id="pickAv"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+      <span class="txt"><small>Vendedor</small><span id="pickName">Elegir quién vende</span></span>
+      <svg class="i chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <ul id="pickList" role="listbox" aria-label="Vendedor"></ul>
+  </div>
+
+  <div class="switch" role="tablist" aria-label="Rifas">
+    <button class="on" data-go="0" role="tab" id="sw0"></button>
+    <button data-go="1" role="tab" id="sw1"></button>
+  </div>
+  <div class="track" id="track"></div>
+
+  <div class="proto">
+    Prototipo: los datos se guardan solo en este navegador. Abre la página en dos pestañas para simular a dos vendedores: lo que elige una se ve en amarillo en la otra.
+  </div>
+</div>
+
+<!-- Barra inferior -->
+<div class="dock">
+  <div class="in">
+    <div>
+      <small id="dockCount">Ningún número elegido</small>
+      <strong id="dockTotal">$0</strong>
+    </div>
+    <button class="btn" id="buyBtn" disabled>
+      Comprar
+      <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Formulario -->
+<div class="veil" id="formVeil">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+    <div class="grab"></div>
+    <header>
+      <div>
+        <div class="eyebrow" id="formRifa"></div>
+        <h3 id="formTitle">Datos del comprador</h3>
+      </div>
+      <button class="iconbtn" id="closeForm" aria-label="Cerrar">
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+
+    <div class="summary">
+      <div class="chips" id="formChips"></div>
+      <div class="row"><span id="formCount"></span><b id="formTotal"></b></div>
+      <div class="by"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Vendido por <b id="formSeller"></b></div>
+    </div>
+
+    <form id="buyForm" novalidate>
+      <div class="field" data-f="nombre">
+        <label for="nombre">Nombre del comprador</label>
+        <input class="inp" id="nombre" autocomplete="name" placeholder="Nombre y apellido">
+        <span class="err">Escribe el nombre</span>
+      </div>
+
+      <div class="field" data-f="telefono">
+        <label for="telefono">Número de contacto</label>
+        <div class="phone">
+          <span class="pre">+56 9</span>
+          <input id="telefono" type="tel" inputmode="numeric" autocomplete="tel-local" maxlength="9" placeholder="1234 5678">
+        </div>
+        <span class="err">Faltan dígitos: son 8 después del +56 9</span>
+      </div>
+
+      <div class="field" data-f="estado">
+        <span class="lbl">Estado del pago</span>
+        <div class="choices two">
+          <input type="radio" name="estado" id="e0" value="Pagado"><label for="e0" class="paid"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Pagado</label>
+          <input type="radio" name="estado" id="e1" value="Pendiente de pago"><label for="e1" class="unpaid"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pendiente de pago</label>
+        </div>
+        <span class="err">Indica si ya pagó o queda pendiente</span>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Prefiere que lo contacten por <span class="opt">(opcional)</span></span>
+        <div class="choices" id="channelChoices"></div>
+      </div>
+
+      <div class="field">
+        <label for="mensaje">Mensaje <span class="opt">(opcional)</span></label>
+        <textarea class="inp" id="mensaje" placeholder="Ej: escríbanme a @usuario en Instagram"></textarea>
+      </div>
+
+      <button class="btn full" type="submit">
+        <svg class="i" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+        Confirmar venta
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Comprobante -->
+<div class="veil center" id="receiptVeil">
+  <div class="receipt" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+    <div class="rh">
+      <div>
+        <div class="eyebrow" id="rRifa"></div>
+        <h4 id="rTitle">Comprobante</h4>
+      </div>
+      <span id="rFolio"></span>
+    </div>
+    <div class="rb">
+      <div class="ok"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Compra registrada</div>
+      <div class="chips" id="rChips"></div>
+      <div class="kv" id="rData"></div>
+      <div class="cut"></div>
+      <div class="tot"><span>Total</span><b id="rTotal"></b></div>
+      <div class="note"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>Toma un pantallazo para guardarlo</div>
+    </div>
+    <div class="rf"><button class="btn full dark" id="closeReceipt">Listo</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ================== CONFIGURACIÓN (editar aquí) ================== */
+const PRECIO = 1000;
+const TOTAL_NUMEROS = 150;
+const VENDEDORES = [
+  'Matías Alarcón Lobos',
+  'Martina Estañaro Calderón',
+  'Catalina Labra Núñez',
+  'Ignacio Labra Pino',
+  'Yanira Luna Castro',
+  'Benjamin Mena Venegas',
+  'Andrés Muñoz Valenzuela',
+  'Oscar Reyes Mansilla',
+  'Vicente Urra Cisternas'
+];
+// img: deja '' para usar el ícono; cuando tengas la foto pon la ruta, ej: 'img/canasta.jpg'
+const RIFAS = [
+  { id:'r1', nombre:'Rifa Canasta', corto:'Rifa 1', sorteo:'[FECHA]', premios:[
+    { nombre:'Canasta básica familiar', icono:'canasta', img:'' },
+    { nombre:'Parlante Bluetooth', icono:'parlante', img:'' },
+    { nombre:'Batidora de mano eléctrica', icono:'batidora', img:'' },
+    { nombre:'Cafetera eléctrica', icono:'cafetera', img:'' }
+  ]},
+  { id:'r2', nombre:'Rifa 2', corto:'Rifa 2', sorteo:'[FECHA]', premios:[
+    { nombre:'Decants de perfume', icono:'perfume', img:'' },
+    { nombre:'Plancha para el pelo', icono:'plancha', img:'' },
+    { nombre:'Pase de batalla de un juego a elección', icono:'control', img:'' },
+    { nombre:'Set de maquillaje y facial', icono:'maquillaje', img:'' }
+  ]}
+];
+const RESERVA_MIN = 10; // minutos que un número queda "en proceso" antes de liberarse
+
+/* ================== ÍCONOS (SVG de trazo) ================== */
+const S = p => `<svg class="i" viewBox="0 0 24 24">${p}</svg>`;
+const ICON = {
+  canasta: S('<path d="M3 10h18l-2 10H5L3 10z"/><path d="M7 10l4-6M17 10l-4-6"/><path d="M9 14v3M12 14v3M15 14v3"/>'),
+  parlante: S('<rect x="6" y="2" width="12" height="20" rx="3"/><circle cx="12" cy="14" r="3.5"/><circle cx="12" cy="6.5" r="1"/>'),
+  batidora: S('<path d="M9 3h6l1 6H8L9 3z"/><path d="M10 9v3M14 9v3"/><path d="M10 12c-2 2-2 6 0 8M14 12c2 2 2 6 0 8M12 12v8"/>'),
+  cafetera: S('<path d="M6 3h12v4H6z"/><path d="M7 7v6a5 5 0 0 0 10 0V7"/><path d="M17 9h1.5a2 2 0 0 1 0 4H17"/><path d="M5 21h14"/>'),
+  perfume: S('<rect x="6" y="9" width="12" height="12" rx="3"/><path d="M10 9V6h4v3"/><path d="M9 4h6"/><path d="M15 6l3-2"/>'),
+  plancha: S('<path d="M8 3l2 11M16 3l-2 11"/><path d="M10 14l-1 7M14 14l1 7"/><path d="M7 3h3M14 3h3"/>'),
+  control: S('<path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6L14 15h-4l-1 .6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".7"/><circle cx="18" cy="13.5" r=".7"/>'),
+  maquillaje: S('<path d="M8 21V11h5v10z"/><path d="M8 11l1.5-7 3.5 3v4"/><circle cx="17.5" cy="16" r="3.5"/>'),
+  wsp: S('<path d="M21 12a9 9 0 0 1-13.4 7.8L3 21l1.3-4.4A9 9 0 1 1 21 12z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5"/>'),
+  ig: S('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/>'),
+  fb: S('<path d="M15 3h-2a4 4 0 0 0-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h2z"/>'),
+  otro: S('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'),
+  info: S('<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>'),
+  check: S('<path d="M20 6L9 17l-5-5"/>'),
+  checkCircle: S('<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>')
+};
+const CANALES = [['WhatsApp','wsp'],['Instagram','ig'],['Facebook','fb'],['Otro','otro']];
+
+/* ================== ALMACENAMIENTO ==================
+   Hoy: localStorage (solo este navegador; sincroniza pestañas).
+   Después: reemplazar load/save por llamadas a Google Sheets (Apps Script). */
+const KEY = 'rifa_coloquios_v2';
+const SELLER_KEY = 'rifa_vendedor';
+const me = sessionStorage.getItem('rifa_me') || (() => { const id = 'c' + Math.random().toString(36).slice(2,9); sessionStorage.setItem('rifa_me', id); return id; })();
+let vendedor = localStorage.getItem(SELLER_KEY) || '';
+
+function seed(){
+  const s = { rifas:{}, ventas:[] };
+  RIFAS.forEach((r,i) => {
+    const sold = {}, pending = {};
+    (i === 0 ? [3,7,15,21,28,33,40,52,58,67,88,101,118,133,148] : [5,9,14,26,49,63,77,90,122,140]).forEach(n => sold[n] = { vendedor:'demo' });
+    (i === 0 ? [18,19,44] : [31,32]).forEach(n => pending[n] = { by:'demo', vendedor:VENDEDORES[2], t:Date.now()+864e5 });
+    s.rifas[r.id] = { sold, pending };
+  });
+  return s;
+}
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || seed(); } catch(e){ return seed(); } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){} }
+let db = load(); save();
+
+function purge(){
+  const lim = Date.now() - RESERVA_MIN*60000;
+  RIFAS.forEach(r => { const p = db.rifas[r.id].pending; Object.keys(p).forEach(n => { if (p[n].t < lim) delete p[n]; }); });
+}
+
+/* ================== UTILIDADES ================== */
+let active = 0;
+const range = [0,0];
+const $ = s => document.querySelector(s);
+const fmt = n => '$' + n.toLocaleString('es-CL');
+const pad = n => String(n).padStart(3,'0');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const firstName = n => { const p = n.split(' '); return p[0] + ' ' + (p[1] ? p[1][0] + '.' : ''); };
+const initials = n => n.split(' ').slice(0,2).map(x=>x[0]).join('');
+const mine = r => Object.keys(db.rifas[r.id].pending).filter(n => db.rifas[r.id].pending[n].by === me).map(Number).sort((a,b)=>a-b);
+
+function toast(msg, icon='info'){
+  const t = $('#toast'); t.innerHTML = ICON[icon] + esc(msg); t.classList.add('show');
+  clearTimeout(toast.h); toast.h = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* ================== RENDER ================== */
+function buildPanels(){
+  RIFAS.forEach((r,i) => $('#sw'+i).textContent = r.nombre);
+  $('#track').innerHTML = RIFAS.map((r,i) => `
+    <section class="panel" data-i="${i}" aria-label="${esc(r.nombre)}">
+      <div class="prizes">
+        ${r.premios.map((p,k)=>`
+          <div class="prize">
+            <div class="pic">${p.img ? `<img src="${esc(p.img)}" alt="${esc(p.nombre)}">` : ICON[p.icono]}</div>
+            <span class="pos">${k+1}</span>
+            <p>${esc(p.nombre)}</p>
+          </div>`).join('')}
+      </div>
+      <div class="ranges" data-r="${i}">
+        ${['1–50','51–100','101–150'].map((l,k)=>`<button data-k="${k}" class="${k===0?'on':''}">${l}</button>`).join('')}
+      </div>
+      <div class="grid" id="grid${i}"></div>
+      <div class="legend">
+        <span><i style="background:var(--surface)"></i>Disponible</span>
+        <span><i style="background:var(--mine)"></i>Tu selección</span>
+        <span><i style="background:var(--pending)"></i>Otro vendedor en proceso</span>
+        <span><i style="background:var(--soldBg)"></i>Vendido</span>
+      </div>
+      <div class="progress">
+        <div class="bar"><span id="bar${i}"></span></div>
+        <p><span id="prog${i}"></span><span><b>${fmt(PRECIO)}</b> c/u</span></p>
+      </div>
+    </section>`).join('');
+}
+
+function renderGrid(i){
+  const r = RIFAS[i], st = db.rifas[r.id], start = range[i]*50;
+  let html = '';
+  for (let n = start+1; n <= start+50; n++){
+    let cls = '', label = 'disponible';
+    if (st.sold[n]) { cls='sold'; label='vendido'; }
+    else if (st.pending[n]) { if (st.pending[n].by === me) { cls='mine'; label='seleccionado por ti'; } else { cls='pending'; label='en proceso por otro vendedor'; } }
+    html += `<button class="n ${cls}" data-n="${n}" aria-label="Número ${n}, ${label}" aria-pressed="${cls==='mine'}">${pad(n)}</button>`;
+  }
+  $('#grid'+i).innerHTML = html;
+  const vend = Object.keys(st.sold).length;
+  $('#bar'+i).style.width = (vend/TOTAL_NUMEROS*100) + '%';
+  $('#prog'+i).textContent = `${vend} de ${TOTAL_NUMEROS} vendidos`;
+}
+
+function renderDock(){
+  const r = RIFAS[active], sel = mine(r);
+  $('#dockCount').textContent = `${r.corto} · ` + (sel.length === 0 ? 'ningún número' : `${sel.length} ${sel.length===1?'número':'números'}`);
+  $('#dockTotal').textContent = fmt(sel.length * PRECIO);
+  $('#buyBtn').disabled = sel.length === 0;
+}
+
+function renderAll(){ purge(); RIFAS.forEach((_,i)=>renderGrid(i)); renderDock(); }
+
+function setActive(i){
+  active = i;
+  document.body.dataset.rifa = i;
+  document.querySelector('meta[name=theme-color]').content = i === 0 ? '#FFFFFF' : '#F1EEFA';
+  document.querySelectorAll('.switch button').forEach((b,k)=>b.classList.toggle('on', k===i));
+  renderDock();
+}
+
+/* ================== VENDEDOR ================== */
+const USER_ICON = '<svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+function renderSellers(){
+  $('#pickAv').innerHTML = vendedor ? initials(vendedor) : USER_ICON;
+  $('#pickName').textContent = vendedor || 'Elegir quién vende';
+  $('#pickList').innerHTML = VENDEDORES.map(v => `
+    <li><button role="option" aria-checked="${v===vendedor}" data-v="${esc(v)}">
+      <span class="av">${initials(v)}</span>${esc(v)}${ICON.check}
+    </button></li>`).join('');
+}
+function togglePick(open){
+  const p = $('#pick'); open = open ?? !p.classList.contains('open');
+  p.classList.toggle('open', open); $('#pickBtn').setAttribute('aria-expanded', open);
+}
+$('#pickBtn').addEventListener('click', () => togglePick());
+$('#pickList').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  vendedor = b.dataset.v; localStorage.setItem(SELLER_KEY, vendedor);
+  $('#pick').classList.remove('need');
+  renderSellers(); togglePick(false);
+  toast('Vendes como ' + firstName(vendedor), 'check');
+});
+document.addEventListener('click', e => { if (!e.target.closest('#pick')) togglePick(false); });
+function needSeller(){
+  const p = $('#pick'); p.classList.remove('need'); void p.offsetWidth; p.classList.add('need');
+  window.scrollTo({ top:0, behavior:'smooth' });
+  setTimeout(() => togglePick(true), 0);
+  toast('Primero elige quién vende');
+}
+
+/* ================== INTERACCIÓN ================== */
+$('#track').addEventListener('click', e => {
+  const rb = e.target.closest('.ranges button');
+  if (rb){
+    const i = +rb.parentNode.dataset.r; range[i] = +rb.dataset.k;
+    rb.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b===rb));
+    renderGrid(i); return;
+  }
+  const b = e.target.closest('.n'); if (!b) return;
+  const i = +b.closest('.panel').dataset.i, r = RIFAS[i], n = +b.dataset.n;
+  db = load(); purge();
+  const st = db.rifas[r.id];
+  if (st.sold[n]) { toast('Ese número ya está vendido'); renderGrid(i); return; }
+  if (st.pending[n] && st.pending[n].by !== me) { toast(firstName(st.pending[n].vendedor || 'Otro vendedor') + ' lo está procesando'); renderGrid(i); return; }
+  if (st.pending[n]) delete st.pending[n]; else st.pending[n] = { by:me, vendedor, t:Date.now() };
+  save(); renderGrid(i); renderDock();
+});
+
+// Carrusel entre rifas
+const track = $('#track');
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => track.scrollTo({ left: +b.dataset.go * track.clientWidth, behavior:'smooth' })));
+track.addEventListener('scroll', () => {
+  const i = Math.round(track.scrollLeft / track.clientWidth);
+  if (i !== active) setActive(i);
+}, { passive:true });
+
+// Sincronización entre pestañas (simula el tiempo real)
+window.addEventListener('storage', e => { if (e.key === KEY){ db = load(); renderAll(); } });
+setInterval(renderAll, 30000);
+
+// Menú
+$('#menuBtn').addEventListener('click', () => { const m=$('#menu'); m.classList.toggle('open'); $('#menuBtn').setAttribute('aria-expanded', m.classList.contains('open')); });
+document.addEventListener('click', e => { if (!e.target.closest('#menu') && !e.target.closest('#menuBtn')) $('#menu').classList.remove('open'); });
+$('#resetBtn').addEventListener('click', () => { localStorage.removeItem(KEY); db = load(); save(); renderAll(); $('#menu').classList.remove('open'); toast('Prueba reiniciada','check'); });
+$('#exportBtn').addEventListener('click', () => {
+  const cols = ['fecha','rifa','numeros','vendedor','comprador','telefono','estado','contacto_preferido','mensaje','total','folio'];
+  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  const csv = [cols.join(';')].concat(db.ventas.map(v => cols.map(c => q(v[c])).join(';'))).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8' }));
+  a.download = 'ventas_rifa.csv'; a.click();
+  $('#menu').classList.remove('open');
+});
+
+/* ================== FORMULARIO ================== */
+$('#channelChoices').innerHTML = CANALES.map(([v,ic],k)=>`<input type="radio" name="canal" id="c${k}" value="${v}"><label for="c${k}">${ICON[ic]}${v}</label>`).join('');
+// el canal es opcional: tocarlo de nuevo lo desmarca
+document.querySelectorAll('input[name=canal]').forEach(inp => {
+  inp.nextElementSibling.addEventListener('click', e => { if (inp.checked){ e.preventDefault(); inp.checked = false; } });
+});
+
+function openForm(){
+  if (!vendedor){ needSeller(); return; }
+  const r = RIFAS[active], sel = mine(r);
+  if (!sel.length) return;
+  $('#formRifa').textContent = r.nombre;
+  $('#formChips').innerHTML = sel.map(n=>`<span class="chip">${pad(n)}</span>`).join('');
+  $('#formCount').textContent = `${sel.length} × ${fmt(PRECIO)}`;
+  $('#formTotal').textContent = fmt(sel.length*PRECIO);
+  $('#formSeller').textContent = vendedor;
+  document.querySelectorAll('.field').forEach(f=>f.classList.remove('bad'));
+  $('#formVeil').classList.add('open');
+}
+$('#buyBtn').addEventListener('click', openForm);
+// formato 1234 5678 mientras escribe
+$('#telefono').addEventListener('input', e => {
+  const d = e.target.value.replace(/\D/g,'').slice(0,8);
+  e.target.value = d.length > 4 ? d.slice(0,4) + ' ' + d.slice(4) : d;
+});
+$('#closeForm').addEventListener('click', () => $('#formVeil').classList.remove('open'));
+$('#formVeil').addEventListener('click', e => { if (e.target.id === 'formVeil') $('#formVeil').classList.remove('open'); });
+
+$('#buyForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const nombre = $('#nombre').value.trim();
+  const digits = $('#telefono').value.replace(/\D/g,'');
+  const telefono = '+56 9 ' + digits.slice(0,4) + ' ' + digits.slice(4);
+  const estado = (document.querySelector('input[name=estado]:checked')||{}).value;
+  const ok = { nombre: nombre.length >= 2, telefono: digits.length === 8, estado: !!estado };
+  document.querySelectorAll('.field[data-f]').forEach(f => f.classList.toggle('bad', !ok[f.dataset.f]));
+  if (!ok.nombre || !ok.telefono || !ok.estado) return;
+
+  db = load(); purge();
+  const r = RIFAS[active], st = db.rifas[r.id];
+  const sel = Object.keys(st.pending).filter(n => st.pending[n].by === me).map(Number).sort((a,b)=>a-b);
+  if (!sel.length){ toast('Tu reserva expiró, vuelve a elegir'); $('#formVeil').classList.remove('open'); renderAll(); return; }
+
+  const folio = r.id.toUpperCase() + '-' + Date.now().toString(36).slice(-5).toUpperCase();
+  const venta = {
+    fecha: new Date().toLocaleString('es-CL'),
+    rifa: r.nombre, numeros: sel.map(pad).join(', '), vendedor, comprador: nombre, telefono, estado,
+    contacto_preferido: (document.querySelector('input[name=canal]:checked')||{}).value || '',
+    mensaje: $('#mensaje').value.trim(), total: sel.length*PRECIO, folio
+  };
+  sel.forEach(n => { delete st.pending[n]; st.sold[n] = { vendedor, folio, estado }; });
+  db.ventas.push(venta); save();
+
+  $('#formVeil').classList.remove('open');
+  $('#buyForm').reset();
+  renderAll();
+  showReceipt(venta, sel);
+});
+
+/* ================== COMPROBANTE ================== */
+function showReceipt(v, nums){
+  $('#rRifa').textContent = v.rifa;
+  $('#rFolio').innerHTML = `Folio<br>${esc(v.folio)}`;
+  $('#rChips').innerHTML = nums.map(n=>`<span class="chip" style="background:var(--accent)">${pad(n)}</span>`).join('');
+  const rows = [['Comprador',v.comprador],['Contacto',v.telefono],['Pago',v.estado]];
+  if (v.contacto_preferido) rows.push(['Prefiere', v.contacto_preferido]);
+  if (v.mensaje) rows.push(['Mensaje', v.mensaje]);
+  rows.push(['Vendido por', v.vendedor],['Fecha', v.fecha]);
+  $('#rData').innerHTML = rows.map(([k,val])=>`<span>${k}</span><b>${esc(val)}</b>`).join('');
+  $('#rTotal').textContent = fmt(v.total);
+  $('#receiptVeil').classList.add('open');
+}
+$('#closeReceipt').addEventListener('click', () => $('#receiptVeil').classList.remove('open'));
+
+/* ================== INICIO ================== */
+buildPanels();
+renderSellers();
+renderAll();
+</script>
+</body>
+</html>
