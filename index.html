@@ -358,7 +358,7 @@ const VENDEDORES = [
 ];
 // img: deja '' para usar el ícono; cuando tengas la foto pon la ruta, ej: 'img/canasta.jpg'
 const RIFAS = [
-  { id:'r1', nombre:'Rifa Canasta', corto:'Canasta', sorteo:'[FECHA]', premios:[
+  { id:'r1', nombre:'Rifa 1', corto:'Rifa 1', sorteo:'[FECHA]', premios:[
     { nombre:'Canasta básica familiar', icono:'canasta', img:'' },
     { nombre:'Parlante Bluetooth', icono:'parlante', img:'' },
     { nombre:'Batidora de mano eléctrica', icono:'batidora', img:'' },
@@ -485,7 +485,7 @@ function renderGrid(i){
 function cart(){ return RIFAS.map(r => ({ r, nums: mine(r) })).filter(g => g.nums.length); }
 function renderDock(){
   const c = cart(), total = c.reduce((a,g)=>a+g.nums.length, 0);
-  $('#dockCount').textContent = total === 0 ? 'Ningún número elegido' : c.map(g => `${g.r.corto} ${g.nums.length}`).join(' · ');
+  $('#dockCount').textContent = total === 0 ? 'Ningún número elegido' : c.map(g => `${g.r.corto}: ${g.nums.length}`).join(' · ');
   $('#dockTotal').textContent = fmt(total * PRECIO);
   $('#buyBtn').disabled = total === 0;
 }
