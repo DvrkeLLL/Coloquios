@@ -74,8 +74,6 @@ h1{font-weight:900;font-size:32px;line-height:1.05;margin:6px 0 0;letter-spacing
 .switch{margin:16px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--track);padding:4px;border-radius:18px;transition:background-color .35s}
 .switch button{height:44px;border:0;border-radius:14px;background:transparent;font-weight:800;font-size:15px;cursor:pointer;color:var(--muted)}
 .switch button.on{background:var(--surface);color:var(--ink);box-shadow:0 2px 6px rgba(60,40,140,.1)}
-.hint{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);padding:8px 0 0}
-.hint svg{width:14px;height:14px}
 
 /* Carrusel */
 .track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
@@ -83,9 +81,6 @@ h1{font-weight:900;font-size:32px;line-height:1.05;margin:6px 0 0;letter-spacing
 .panel{flex:0 0 100%;scroll-snap-align:start;padding:16px 20px 0;display:flex;flex-direction:column;gap:18px}
 
 /* Premios 2x2 */
-.sec{display:flex;justify-content:space-between;align-items:baseline}
-.sec h2{margin:0;font-size:22px;font-weight:900}
-.sec span{font-size:13px;color:var(--muted);font-weight:600}
 .prizes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .prize{position:relative;aspect-ratio:1/1;background:var(--surface);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(60,40,140,.06)}
 .prize .pic{flex:1;display:grid;place-items:center;background:var(--accentSoft);margin:8px 8px 0;border-radius:18px;color:var(--accent);overflow:hidden}
@@ -195,9 +190,10 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 .receipt .note svg{width:16px;height:16px}
 .receipt .rf{padding:0 20px 20px}
 
+.offline{margin:14px 20px 0;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:#FFF4D6;color:#8A5A0F;font-size:14px;font-weight:800}
+.offline[hidden]{display:none}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 16px;border-radius:16px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%)}
-.proto{margin:24px 20px 0;padding:12px 14px;border:2px dashed var(--line);border-radius:16px;font-size:13px;font-weight:600;color:var(--muted);line-height:1.5}
 </style>
 </head>
 <body data-rifa="0">
@@ -215,8 +211,8 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
       <svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <div class="menu" id="menu" role="menu">
-      <button id="exportBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar ventas (CSV)</button>
-      <button id="resetBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reiniciar prueba</button>
+      <button id="sheetBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Abrir planilla</button>
+      <button id="refreshBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Actualizar tablero</button>
     </div>
   </div>
 
@@ -229,15 +225,17 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     <ul id="pickList" role="listbox" aria-label="Vendedor"></ul>
   </div>
 
+  <div class="offline" id="offline" hidden>
+    <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    La venta abrirá muy pronto
+  </div>
+
   <div class="switch" role="tablist" aria-label="Rifas">
     <button class="on" data-go="0" role="tab" id="sw0"></button>
     <button data-go="1" role="tab" id="sw1"></button>
   </div>
   <div class="track" id="track"></div>
 
-  <div class="proto">
-    Prototipo: los datos se guardan solo en este navegador. Abre la página en dos pestañas para simular a dos vendedores: lo que elige una se ve en amarillo en la otra.
-  </div>
 </div>
 
 <!-- Barra inferior -->
@@ -342,7 +340,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 <div class="toast" id="toast" role="status"></div>
 
 <script>
-/* ================== CONFIGURACIÓN (editar aquí) ================== */
+/* ================== CONFIGURACIÓN ================== */
 const PRECIO = 1000;
 const TOTAL_NUMEROS = 150;
 const VENDEDORES = [
@@ -356,22 +354,28 @@ const VENDEDORES = [
   'Oscar Reyes Mansilla',
   'Vicente Urra Cisternas'
 ];
-// img: deja '' para usar el ícono; cuando tengas la foto pon la ruta, ej: 'img/canasta.jpg'
+// img: '' usa el ícono; con foto pon la ruta, ej: 'img/canasta.jpg'
 const RIFAS = [
-  { id:'r1', nombre:'Rifa 1', corto:'Rifa 1', sorteo:'[FECHA]', premios:[
+  { id:'r1', nombre:'Rifa 1', premios:[
     { nombre:'Canasta básica familiar', icono:'canasta', img:'' },
     { nombre:'Parlante Bluetooth', icono:'parlante', img:'' },
     { nombre:'Batidora de mano eléctrica', icono:'batidora', img:'' },
     { nombre:'Cafetera eléctrica', icono:'cafetera', img:'' }
   ]},
-  { id:'r2', nombre:'Rifa 2', corto:'Rifa 2', sorteo:'[FECHA]', premios:[
+  { id:'r2', nombre:'Rifa 2', premios:[
     { nombre:'Decants de perfume', icono:'perfume', img:'' },
     { nombre:'Plancha para el pelo', icono:'plancha', img:'' },
     { nombre:'Pase de batalla de un juego a elección', icono:'control', img:'' },
     { nombre:'Set de maquillaje y facial', icono:'maquillaje', img:'' }
   ]}
 ];
-const RESERVA_MIN = 10; // minutos que un número queda "en proceso" antes de liberarse
+
+/* ================== CONEXIÓN CON GOOGLE SHEETS ==================
+   URL de la aplicación web de Apps Script. Si se deja vacía, la página no permite vender. */
+const API_URL = 'https://script.google.com/macros/s/AKfycbz2EEpPXgrvYBc0ovoCuvwP4xnJQGRX4-zyZyGiZN0X3-HR9RW26KE_pB8JhomfzHsH-Q/exec';
+const TOKEN = 'coloquios-2026'; // igual que CONFIG.TOKEN en Codigo.gs
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Tc9rsnZGp9_4Gb9VREAvBJy2k5iKhrr92uWV06gobGk/edit';
+const POLL_MS = 4000;           // cada cuánto se actualiza el tablero
 
 /* ================== ÍCONOS (SVG de trazo) ================== */
 const S = p => `<svg class="i" viewBox="0 0 24 24">${p}</svg>`;
@@ -394,31 +398,30 @@ const ICON = {
 };
 const CANALES = [['WhatsApp','wsp'],['Instagram','ig'],['Facebook','fb'],['Otro','otro']];
 
-/* ================== ALMACENAMIENTO ==================
-   Hoy: localStorage (solo este navegador; sincroniza pestañas).
-   Después: reemplazar load/save por llamadas a Google Sheets (Apps Script). */
-const KEY = 'rifa_coloquios_v2';
+/* ================== ESTADO ================== */
 const SELLER_KEY = 'rifa_vendedor';
-const me = sessionStorage.getItem('rifa_me') || (() => { const id = 'c' + Math.random().toString(36).slice(2,9); sessionStorage.setItem('rifa_me', id); return id; })();
+const me = localStorage.getItem('rifa_me') || (() => { const id = 'c' + Math.random().toString(36).slice(2,9); localStorage.setItem('rifa_me', id); return id; })();
 let vendedor = localStorage.getItem(SELLER_KEY) || '';
+const db = { rifas:{} };
+RIFAS.forEach(r => db.rifas[r.id] = { sold:{}, pending:{} });
+let ready = false, mut = 0, busy = false;
 
-function seed(){
-  const s = { rifas:{}, ventas:[] };
-  RIFAS.forEach((r,i) => {
-    const sold = {}, pending = {};
-    (i === 0 ? [3,7,15,21,28,33,40,52,58,67,88,101,118,133,148] : [5,9,14,26,49,63,77,90,122,140]).forEach(n => sold[n] = { vendedor:'demo' });
-    (i === 0 ? [18,19,44] : [31,32]).forEach(n => pending[n] = { by:'demo', vendedor:VENDEDORES[2], t:Date.now()+864e5 });
-    s.rifas[r.id] = { sold, pending };
-  });
-  return s;
+/* ================== API ================== */
+async function api(action, data = {}){
+  const r = await fetch(API_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ token:TOKEN, action, ...data }) });
+  return r.json();
 }
-function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || seed(); } catch(e){ return seed(); } }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){} }
-let db = load(); save();
-
-function purge(){
-  const lim = Date.now() - RESERVA_MIN*60000;
-  RIFAS.forEach(r => { const p = db.rifas[r.id].pending; Object.keys(p).forEach(n => { if (p[n].t < lim) delete p[n]; }); });
+function applyState(st){
+  if (!st) return;
+  RIFAS.forEach(r => { if (st[r.id]) db.rifas[r.id] = { sold: st[r.id].sold || {}, pending: st[r.id].pending || {} }; });
+  ready = true;
+  renderAll();
+}
+async function refresh(){
+  if (!API_URL || busy || document.hidden) return;
+  const m = mut;
+  try { const res = await api('state'); if (res.ok && m === mut) applyState(res.state); }
+  catch(e){ /* sin conexión: se reintenta en el próximo ciclo */ }
 }
 
 /* ================== UTILIDADES ================== */
@@ -485,12 +488,12 @@ function renderGrid(i){
 function cart(){ return RIFAS.map(r => ({ r, nums: mine(r) })).filter(g => g.nums.length); }
 function renderDock(){
   const c = cart(), total = c.reduce((a,g)=>a+g.nums.length, 0);
-  $('#dockCount').textContent = total === 0 ? 'Ningún número elegido' : c.map(g => `${g.r.corto}: ${g.nums.length}`).join(' · ');
+  $('#dockCount').textContent = total === 0 ? 'Ningún número elegido' : c.map(g => `${g.r.nombre}: ${g.nums.length}`).join(' · ');
   $('#dockTotal').textContent = fmt(total * PRECIO);
   $('#buyBtn').disabled = total === 0;
 }
 
-function renderAll(){ purge(); RIFAS.forEach((_,i)=>renderGrid(i)); renderDock(); }
+function renderAll(){ RIFAS.forEach((_,i)=>renderGrid(i)); renderDock(); }
 
 function setActive(i){
   active = i;
@@ -540,12 +543,19 @@ $('#track').addEventListener('click', e => {
   }
   const b = e.target.closest('.n'); if (!b) return;
   const i = +b.closest('.panel').dataset.i, r = RIFAS[i], n = +b.dataset.n;
-  db = load(); purge();
+  if (!API_URL){ toast('La venta aún no está habilitada'); return; }
+  if (!ready){ toast('Cargando el tablero…'); return; }
+  if (!vendedor){ needSeller(); return; }
   const st = db.rifas[r.id];
-  if (st.sold[n]) { toast('Ese número ya está vendido'); renderGrid(i); return; }
-  if (st.pending[n] && st.pending[n].by !== me) { toast(firstName(st.pending[n].vendedor || 'Otro vendedor') + ' lo está procesando'); renderGrid(i); return; }
-  if (st.pending[n]) delete st.pending[n]; else st.pending[n] = { by:me, vendedor, t:Date.now() };
-  save(); renderGrid(i); renderDock();
+  if (st.sold[n]) { toast('Ese número ya está vendido'); return; }
+  if (st.pending[n] && st.pending[n].by !== me) { toast(firstName(st.pending[n].vendedor || 'Otro vendedor') + ' lo está procesando'); return; }
+  // cambio inmediato en pantalla; el servidor confirma
+  if (st.pending[n]) delete st.pending[n]; else st.pending[n] = { by:me, vendedor };
+  renderGrid(i); renderDock();
+  mut++;
+  api('toggle', { rifa:r.id, n, by:me, vendedor })
+    .then(res => { if (!res.ok) toast(res.msg); applyState(res.state); })
+    .catch(() => { toast('Sin conexión, intenta de nuevo'); mut++; refresh(); });
 });
 
 // Carrusel entre rifas
@@ -556,23 +566,15 @@ track.addEventListener('scroll', () => {
   if (i !== active) setActive(i);
 }, { passive:true });
 
-// Sincronización entre pestañas (simula el tiempo real)
-window.addEventListener('storage', e => { if (e.key === KEY){ db = load(); renderAll(); } });
-setInterval(renderAll, 30000);
+// Actualización en tiempo real
+setInterval(refresh, POLL_MS);
+document.addEventListener('visibilitychange', refresh);
 
 // Menú
 $('#menuBtn').addEventListener('click', () => { const m=$('#menu'); m.classList.toggle('open'); $('#menuBtn').setAttribute('aria-expanded', m.classList.contains('open')); });
 document.addEventListener('click', e => { if (!e.target.closest('#menu') && !e.target.closest('#menuBtn')) $('#menu').classList.remove('open'); });
-$('#resetBtn').addEventListener('click', () => { localStorage.removeItem(KEY); db = load(); save(); renderAll(); $('#menu').classList.remove('open'); toast('Prueba reiniciada','check'); });
-$('#exportBtn').addEventListener('click', () => {
-  const cols = ['fecha','rifa','numeros','vendedor','comprador','telefono','estado','contacto_preferido','mensaje','total','folio'];
-  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
-  const csv = [cols.join(';')].concat(db.ventas.map(v => cols.map(c => q(v[c])).join(';'))).join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8' }));
-  a.download = 'ventas_rifa.csv'; a.click();
-  $('#menu').classList.remove('open');
-});
+$('#sheetBtn').addEventListener('click', () => { window.open(SHEET_URL, '_blank', 'noopener'); $('#menu').classList.remove('open'); });
+$('#refreshBtn').addEventListener('click', () => { $('#menu').classList.remove('open'); mut++; refresh().then(() => toast('Tablero actualizado','check')); });
 
 /* ================== FORMULARIO ================== */
 $('#channelChoices').innerHTML = CANALES.map(([v,ic],k)=>`<input type="radio" name="canal" id="c${k}" value="${v}"><label for="c${k}">${ICON[ic]}${v}</label>`).join('');
@@ -615,7 +617,7 @@ $('#telefono').addEventListener('input', e => {
 $('#closeForm').addEventListener('click', () => $('#formVeil').classList.remove('open'));
 $('#formVeil').addEventListener('click', e => { if (e.target.id === 'formVeil') $('#formVeil').classList.remove('open'); });
 
-$('#buyForm').addEventListener('submit', e => {
+$('#buyForm').addEventListener('submit', async e => {
   e.preventDefault();
   const nombre = $('#nombre').value.trim();
   const digits = $('#telefono').value.replace(/\D/g,'');
@@ -625,28 +627,23 @@ $('#buyForm').addEventListener('submit', e => {
   document.querySelectorAll('.field[data-f]').forEach(f => f.classList.toggle('bad', !ok[f.dataset.f]));
   if (!ok.nombre || !ok.telefono || !ok.estado) return;
 
-  db = load(); purge();
-  const c = cart();
-  if (!c.length){ toast('Tu reserva expiró, vuelve a elegir'); $('#formVeil').classList.remove('open'); renderAll(); return; }
-
-  const folio = 'RC-' + Date.now().toString(36).slice(-6).toUpperCase();
-  const base = {
-    fecha: new Date().toLocaleString('es-CL'), vendedor, comprador: nombre, telefono, estado,
-    contacto_preferido: (document.querySelector('input[name=canal]:checked')||{}).value || '',
-    mensaje: $('#mensaje').value.trim(), folio
-  };
-  // una fila por rifa (mismo folio), así queda ordenado en la planilla
-  c.forEach(g => {
-    const st = db.rifas[g.r.id];
-    g.nums.forEach(n => { delete st.pending[n]; st.sold[n] = { vendedor, folio, estado }; });
-    db.ventas.push({ ...base, rifa: g.r.nombre, numeros: g.nums.map(pad).join(', '), total: g.nums.length*PRECIO });
-  });
-  save();
-
-  $('#formVeil').classList.remove('open');
-  $('#buyForm').reset();
-  renderAll();
-  showReceipt({ ...base, total: c.reduce((a,g)=>a+g.nums.length,0)*PRECIO }, c);
+  const canal = (document.querySelector('input[name=canal]:checked')||{}).value || '';
+  const mensaje = $('#mensaje').value.trim();
+  const btn = $('#buyForm button[type=submit]'), html = btn.innerHTML;
+  btn.disabled = true; btn.textContent = 'Guardando…'; busy = true; mut++;
+  try {
+    const res = await api('buy', { by:me, vendedor, comprador:nombre, telefono, estado, canal, mensaje });
+    applyState(res.state);
+    if (!res.ok){ toast(res.msg); return; }
+    const c = RIFAS.filter(r => res.grupos[r.id]).map(r => ({ r, nums: res.grupos[r.id] }));
+    $('#formVeil').classList.remove('open'); $('#buyForm').reset();
+    showReceipt({ fecha:res.fecha, vendedor, comprador:nombre, telefono, estado, contacto_preferido:canal, mensaje, folio:res.folio,
+                  total: c.reduce((a,g)=>a+g.nums.length,0)*PRECIO }, c);
+  } catch(err){
+    toast('No se pudo guardar. Revisa tu conexión');
+  } finally {
+    btn.disabled = false; btn.innerHTML = html; busy = false;
+  }
 });
 
 /* ================== COMPROBANTE ================== */
@@ -668,6 +665,8 @@ $('#closeReceipt').addEventListener('click', () => $('#receiptVeil').classList.r
 buildPanels();
 renderSellers();
 renderAll();
+if (API_URL){ toast('Cargando el tablero…'); refresh(); }
+else $('#offline').hidden = false;
 </script>
 </body>
 </html>
