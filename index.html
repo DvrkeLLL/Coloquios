@@ -277,7 +277,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     <form id="buyForm" novalidate>
       <div class="field" data-f="nombre">
         <label for="nombre">Nombre del comprador</label>
-        <input class="inp" id="nombre" autocomplete="name" placeholder="Nombre y apellido">
+        <input class="inp" id="nombre" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="Nombre y apellido">
         <span class="err">Escribe el nombre</span>
       </div>
 
@@ -594,10 +594,19 @@ function openForm(){
   $('#formCount').textContent = `${total} × ${fmt(PRECIO)}`;
   $('#formTotal').textContent = fmt(total*PRECIO);
   $('#formSeller').textContent = vendedor;
+  // número de ejemplo distinto cada vez
+  const r8 = String(Math.floor(Math.random()*1e8)).padStart(8,'0');
+  $('#telefono').placeholder = r8.slice(0,4) + ' ' + r8.slice(4);
   document.querySelectorAll('.field').forEach(f=>f.classList.remove('bad'));
   $('#formVeil').classList.add('open');
 }
 $('#buyBtn').addEventListener('click', openForm);
+// nombre: mayúscula al inicio de cada palabra mientras escribe
+$('#nombre').addEventListener('input', e => {
+  const el = e.target, pos = el.selectionStart;
+  const v = el.value.replace(/(^|[\s-])(\S)/g, (m, sep, ch) => sep + ch.toLocaleUpperCase('es-CL'));
+  if (v !== el.value){ el.value = v; el.setSelectionRange(pos, pos); }
+});
 // formato 1234 5678 mientras escribe
 $('#telefono').addEventListener('input', e => {
   const d = e.target.value.replace(/\D/g,'').slice(0,8);
