@@ -21,14 +21,14 @@
 <style>
 :root{
   --ink:#231B3A; --muted:#6E6688; --surface:#FFFFFF;
-  --mine:#19824A; --pending:#FFC93C; --soldBg:#E6E1EE; --soldFg:#A29BB5;
+  --mine:#19824A; --soldBg:#E6E1EE; --soldFg:#A29BB5;
   --r:24px; --cr:16px;
   --font:Nunito, system-ui, -apple-system, sans-serif;
 }
 /* Tema por rifa */
 body[data-rifa="0"]{ --bg:#FFFFFF; --track:#F0EEF5; --line:#E6E2EF; --accent:#6D4AE8; --accentSoft:#EFEBFA; }
 /* En fondo blanco, las tarjetas blancas llevan un borde suave para distinguirse */
-body[data-rifa="0"] .n:not(.mine):not(.pending):not(.sold),
+body[data-rifa="0"] .n:not(.mine):not(.sold),
 body[data-rifa="0"] .prize, body[data-rifa="0"] .progress, body[data-rifa="0"] .pick>button,
 body[data-rifa="0"] .summary, body[data-rifa="0"] .choices label{box-shadow:inset 0 0 0 1.5px #ECE8F3}
 body[data-rifa="0"] .inp, body[data-rifa="0"] .phone{border-color:#ECE8F3}
@@ -109,7 +109,9 @@ h1{font-weight:900;font-size:32px;line-height:1.05;margin:6px 0 0;letter-spacing
 .n{height:52px;border:0;background:var(--surface);border-radius:var(--cr);font-weight:800;font-size:17px;cursor:pointer;font-variant-numeric:tabular-nums;box-shadow:0 2px 6px rgba(60,40,140,.07);transition:transform .08s}
 .n:active{transform:scale(.92)}
 .n.mine{background:var(--mine);color:#fff;box-shadow:0 4px 10px rgba(25,130,74,.3)}
-.n.pending{background:var(--pending);color:var(--ink);cursor:not-allowed}
+.notice{display:flex;gap:10px;align-items:flex-start;background:#FFF4D6;color:#6B4708;border-radius:16px;padding:12px 14px;margin-bottom:12px;font-size:14px;font-weight:700;line-height:1.4}
+.notice[hidden]{display:none}
+.notice svg{flex-shrink:0;margin-top:1px}
 .n.sold{background:var(--soldBg);color:var(--soldFg);text-decoration:line-through;cursor:not-allowed;box-shadow:none}
 
 .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
@@ -183,6 +185,19 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 .live .ld{font-size:16px;font-weight:900}
 .live .ll{font-size:14px;font-weight:800;color:var(--accent);word-break:break-all}
 .live .ll.off{color:var(--muted);pointer-events:none}
+.sfilter{grid-template-columns:repeat(2,1fr);margin-bottom:6px}
+.scount{margin:8px 2px 10px;font-size:13px;font-weight:700;color:var(--muted)}
+.slist{display:flex;flex-direction:column;gap:8px}
+.sale{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;background:var(--surface);border-radius:18px;text-align:left;cursor:pointer}
+.sale .sm{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.sale .sm b{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sale .sm span{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sale .sr{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.sale .sr b{font-size:15px;font-weight:900}
+.tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px}
+.tag.paid{background:#E3F4EA;color:var(--mine)}
+.tag.unpaid{background:#FFF4D6;color:#8A5A0F}
+.sempty{text-align:center;padding:30px 10px;color:var(--muted);font-weight:700;font-size:14px}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
 .receipt .rh{background:var(--accent);color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
 .receipt .rh .eyebrow{color:rgba(255,255,255,.8)}
@@ -221,6 +236,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
       <svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <div class="menu" id="menu" role="menu">
+      <button id="salesBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Ventas y tickets</button>
       <button id="sheetBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Abrir planilla</button>
       <button id="refreshBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Actualizar tablero</button>
     </div>
@@ -276,6 +292,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
       </button>
     </header>
 
+    <div class="notice" id="formNotice" role="alert" hidden></div>
     <div class="summary">
       <div id="formChips" style="display:flex;flex-direction:column;gap:10px"></div>
       <div class="row"><span id="formCount"></span><b id="formTotal"></b></div>
@@ -322,6 +339,28 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
         Confirmar venta
       </button>
     </form>
+  </div>
+</div>
+
+<!-- Ventas -->
+<div class="veil" id="salesVeil">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="salesTitle">
+    <div class="grab"></div>
+    <header>
+      <div>
+        <div class="eyebrow">Historial</div>
+        <h3 id="salesTitle">Ventas</h3>
+      </div>
+      <button class="iconbtn" id="closeSales" aria-label="Cerrar">
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+    <div class="ranges sfilter" role="tablist" aria-label="Filtrar ventas">
+      <button class="on" data-f="all">Todas</button>
+      <button data-f="mine">Mías</button>
+    </div>
+    <p class="scount" id="salesCount"></p>
+    <div class="slist" id="salesList"></div>
   </div>
 </div>
 
@@ -399,7 +438,6 @@ const TOKEN = 'coloquios-2026'; // igual que CONFIG.TOKEN en Codigo.gs
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Tc9rsnZGp9_4Gb9VREAvBJy2k5iKhrr92uWV06gobGk/edit';
 const POLL_MS = 4000;           // cada cuánto se actualiza el tablero
 const TIMEOUT_MS = 15000;       // tiempo máximo de espera de cada consulta a la planilla
-// (las reservas "en proceso" se liberan solas a los 10 minutos: RESERVA_MIN en Codigo.gs)
 
 /* ================== SORTEO EN VIVO (aparece en el ticket) ================== */
 const LIVE_FECHA = ''; // PENDIENTE, ej: 'Sábado 20 de diciembre · 20:00 hrs'
@@ -428,10 +466,11 @@ const CANALES = [['WhatsApp','wsp'],['Instagram','ig'],['Facebook','fb'],['Otro'
 
 /* ================== ESTADO ================== */
 const SELLER_KEY = 'rifa_vendedor';
-const me = localStorage.getItem('rifa_me') || (() => { const id = 'c' + Math.random().toString(36).slice(2,9); localStorage.setItem('rifa_me', id); return id; })();
 let vendedor = localStorage.getItem(SELLER_KEY) || '';
 const db = { rifas:{} };
-RIFAS.forEach(r => db.rifas[r.id] = { sold:{}, pending:{} });
+RIFAS.forEach(r => db.rifas[r.id] = { sold:{} });
+// números elegidos: solo viven en este celular hasta confirmar la venta
+const sel = {}; RIFAS.forEach(r => sel[r.id] = new Set());
 let ready = false, mut = 0, busy = false;
 
 /* ================== API ================== */
@@ -444,8 +483,12 @@ async function api(action, data = {}){
 }
 function applyState(st){
   if (!st) return;
-  RIFAS.forEach(r => { if (st[r.id]) db.rifas[r.id] = { sold: st[r.id].sold || {}, pending: st[r.id].pending || {} }; });
+  RIFAS.forEach(r => { if (st[r.id]) db.rifas[r.id] = { sold: st[r.id].sold || {} }; });
   ready = true;
+  // si otro vendedor vendió algo que tenías elegido, se quita de tu selección
+  const lost = [];
+  RIFAS.forEach(r => sel[r.id].forEach(n => { if (db.rifas[r.id].sold[n]){ sel[r.id].delete(n); lost.push(`${pad(n)} de la ${r.nombre}`); } }));
+  if (lost.length && !busy) toast(`Se acaba de vender el ${lost.join(' y el ')}; lo quitamos de tu selección`);
   renderAll();
 }
 async function refresh(){
@@ -464,7 +507,7 @@ const pad = n => String(n).padStart(3,'0');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const firstName = n => { const p = n.split(' '); return p[0] + ' ' + (p[1] ? p[1][0] + '.' : ''); };
 const initials = n => n.split(' ').slice(0,2).map(x=>x[0]).join('');
-const mine = r => Object.keys(db.rifas[r.id].pending).filter(n => db.rifas[r.id].pending[n].by === me).map(Number).sort((a,b)=>a-b);
+const mine = r => [...sel[r.id]].sort((a,b)=>a-b);
 
 function toast(msg, icon='info'){
   const t = $('#toast'); t.innerHTML = ICON[icon] + esc(msg); t.classList.add('show');
@@ -491,7 +534,6 @@ function buildPanels(){
       <div class="legend">
         <span><i style="background:var(--surface)"></i>Disponible</span>
         <span><i style="background:var(--mine)"></i>Tu selección</span>
-        <span><i style="background:var(--pending)"></i>Otro vendedor en proceso</span>
         <span><i style="background:var(--soldBg)"></i>Vendido</span>
       </div>
       <div class="progress">
@@ -507,7 +549,7 @@ function renderGrid(i){
   for (let n = start+1; n <= start+50; n++){
     let cls = '', label = 'disponible';
     if (st.sold[n]) { cls='sold'; label='vendido'; }
-    else if (st.pending[n]) { if (st.pending[n].by === me) { cls='mine'; label='seleccionado por ti'; } else { cls='pending'; label='en proceso por otro vendedor'; } }
+    else if (sel[r.id].has(n)) { cls='mine'; label='seleccionado por ti'; }
     html += `<button class="n ${cls}" data-n="${n}" aria-label="Número ${n}, ${label}" aria-pressed="${cls==='mine'}">${pad(n)}</button>`;
   }
   $('#grid'+i).innerHTML = html;
@@ -576,17 +618,9 @@ $('#track').addEventListener('click', e => {
   const i = +b.closest('.panel').dataset.i, r = RIFAS[i], n = +b.dataset.n;
   if (!API_URL){ toast('La venta aún no está habilitada'); return; }
   if (!ready){ toast('Cargando el tablero…'); return; }
-  if (!vendedor){ needSeller(); return; }
-  const st = db.rifas[r.id];
-  if (st.sold[n]) { toast('Ese número ya está vendido'); return; }
-  if (st.pending[n] && st.pending[n].by !== me) { toast(firstName(st.pending[n].vendedor || 'Otro vendedor') + ' lo está procesando'); return; }
-  // cambio inmediato en pantalla; el servidor confirma
-  if (st.pending[n]) delete st.pending[n]; else st.pending[n] = { by:me, vendedor };
+  if (db.rifas[r.id].sold[n]) { toast('Ese número ya está vendido'); return; }
+  if (sel[r.id].has(n)) sel[r.id].delete(n); else sel[r.id].add(n);
   renderGrid(i); renderDock();
-  mut++;
-  api('toggle', { rifa:r.id, n, by:me, vendedor })
-    .then(res => { if (!res.ok) toast(res.msg); applyState(res.state); })
-    .catch(() => { toast('Sin conexión, intenta de nuevo'); mut++; refresh(); });
 });
 
 // Carrusel entre rifas
@@ -618,15 +652,24 @@ function groupsHTML(c, color){
   return c.map(g => `<div class="grp"><small><span>${esc(g.r.nombre)}</span><span>${fmt(g.nums.length*PRECIO)}</span></small>
     <div class="chips">${g.nums.map(n=>`<span class="chip" style="background:${color}">${pad(n)}</span>`).join('')}</div></div>`).join('');
 }
-function openForm(){
-  if (!vendedor){ needSeller(); return; }
+function fillSummary(){
   const c = cart(), total = c.reduce((a,g)=>a+g.nums.length, 0);
-  if (!total) return;
-  $('#formRifa').textContent = 'Resumen de la compra';
   $('#formChips').innerHTML = groupsHTML(c, 'var(--mine)');
   $('#formCount').textContent = `${total} × ${fmt(PRECIO)}`;
   $('#formTotal').textContent = fmt(total*PRECIO);
   $('#formSeller').textContent = vendedor;
+}
+function showNotice(txt){
+  const n = $('#formNotice');
+  n.innerHTML = ICON.info + '<span>' + esc(txt) + '</span>'; n.hidden = false;
+  n.closest('.sheet').scrollTop = 0;
+}
+function openForm(){
+  if (!vendedor){ needSeller(); return; }
+  if (!cart().length) return;
+  $('#formRifa').textContent = 'Resumen de la compra';
+  $('#formNotice').hidden = true;
+  fillSummary();
   // número de ejemplo distinto cada vez
   const r8 = String(Math.floor(Math.random()*1e8)).padStart(8,'0');
   $('#telefono').placeholder = r8.slice(0,4) + ' ' + r8.slice(4);
@@ -663,10 +706,22 @@ $('#buyForm').addEventListener('submit', async e => {
   const btn = $('#buyForm button[type=submit]'), html = btn.innerHTML;
   btn.disabled = true; btn.textContent = 'Guardando…'; busy = true; mut++;
   try {
-    const res = await api('buy', { by:me, vendedor, comprador:nombre, telefono, estado, canal, mensaje });
+    const grupos = {}; cart().forEach(g => grupos[g.r.id] = g.nums);
+    const res = await api('buy', { vendedor, comprador:nombre, telefono, estado, canal, mensaje, grupos });
+    if (res.conflictos){
+      // alguien vendió uno de estos números mientras se completaba el formulario: no se guardó nada
+      const lost = [];
+      RIFAS.forEach(r => (res.conflictos[r.id] || []).forEach(n => { sel[r.id].delete(n); lost.push(`el ${pad(n)} de la ${r.nombre}`); }));
+      applyState(res.state);
+      const quedan = cart().length;
+      const txt = `Alguien se adelantó con ${lost.join(' y ')}. ` + (quedan ? 'Lo sacamos de esta compra; revisa el total y confirma de nuevo.' : 'No quedan números en esta compra; elige otros.');
+      if (!quedan){ $('#formVeil').classList.remove('open'); toast(txt); return; }
+      fillSummary(); showNotice(txt); return;
+    }
     applyState(res.state);
     if (!res.ok){ toast(res.msg); return; }
     const c = RIFAS.filter(r => res.grupos[r.id]).map(r => ({ r, nums: res.grupos[r.id] }));
+    RIFAS.forEach(r => sel[r.id].clear()); renderAll();
     $('#formVeil').classList.remove('open'); $('#buyForm').reset();
     showReceipt({ fecha:res.fecha, vendedor, comprador:nombre, telefono, estado, contacto_preferido:canal, mensaje, folio:res.folio,
                   total: c.reduce((a,g)=>a+g.nums.length,0)*PRECIO }, c);
@@ -693,7 +748,7 @@ function waText(v, c){
   return lines.join('\n');
 }
 
-function showReceipt(v, c){
+function showReceipt(v, c, celebrate = true){
   lastTicket = { v, c };
   $('#rRifa').textContent = 'Rifa Coloquios';
   $('#rFolio').innerHTML = `Folio<br>${esc(v.folio)}`;
@@ -716,7 +771,7 @@ function showReceipt(v, c){
 
   $('#receiptVeil').classList.add('open');
   $('#receiptVeil').scrollTop = 0;
-  confetti();
+  if (celebrate) confetti();
   // el PDF se prepara de inmediato para que "Compartir" funcione al primer toque
   pdfFile = null; $('#shareBtn').hidden = true;
   pdfJob = new Promise(r => setTimeout(r, 500)).then(() => makePdf(v.folio)).then(f => {
@@ -799,6 +854,55 @@ function confetti(){
     if (life < 1) requestAnimationFrame(frame); else ctx.clearRect(0, 0, innerWidth, innerHeight);
   })(t0);
 }
+
+/* ================== VENTAS ================== */
+let salesData = [], salesFilter = 'all';
+async function openSales(){
+  $('#menu').classList.remove('open');
+  $('#salesVeil').classList.add('open');
+  if (!API_URL){ $('#salesList').innerHTML = '<div class="sempty">La venta aún no está habilitada</div>'; return; }
+  $('#salesCount').textContent = '';
+  $('#salesList').innerHTML = '<div class="sempty">Cargando ventas…</div>';
+  try {
+    const res = await api('sales');
+    if (!res.ok) throw new Error(res.msg);
+    salesData = res.ventas || [];
+    renderSales();
+  } catch(e){
+    $('#salesList').innerHTML = '<div class="sempty">No se pudieron cargar las ventas. Intenta de nuevo</div>';
+  }
+}
+function renderSales(){
+  const list = salesFilter === 'mine' ? salesData.filter(v => v.vendedor === vendedor) : salesData;
+  const total = list.reduce((a,v) => a + Object.values(v.grupos).reduce((x,g)=>x+g.length,0), 0);
+  $('#salesCount').textContent = `${list.length} ${list.length===1?'venta':'ventas'} · ${total} números · ${fmt(total*PRECIO)}`;
+  if (!list.length){ $('#salesList').innerHTML = `<div class="sempty">${salesFilter==='mine' && !vendedor ? 'Elige quién vende para ver tus ventas' : 'Aún no hay ventas'}</div>`; return; }
+  $('#salesList').innerHTML = list.map(v => {
+    const i = salesData.indexOf(v);
+    const nums = RIFAS.filter(r => v.grupos[r.id]).map(r => `${r.nombre}: ${v.grupos[r.id].map(pad).join(', ')}`).join(' · ');
+    const cant = Object.values(v.grupos).reduce((x,g)=>x+g.length,0);
+    const paid = v.estado === 'Pagado';
+    return `<button class="sale" data-i="${i}">
+      <div class="sm"><b>${esc(v.comprador || 'Sin nombre')}</b><span>${esc(nums)}</span><span>${esc(v.fecha || 'Sin fecha')}${v.vendedor ? ' · ' + esc(firstName(v.vendedor)) : ''}</span></div>
+      <div class="sr"><b>${fmt(cant*PRECIO)}</b><span class="tag ${paid?'paid':'unpaid'}">${paid?'Pagado':'Pendiente'}</span></div>
+    </button>`;
+  }).join('');
+}
+$('#salesBtn').addEventListener('click', openSales);
+$('#closeSales').addEventListener('click', () => $('#salesVeil').classList.remove('open'));
+$('#salesVeil').addEventListener('click', e => { if (e.target.id === 'salesVeil') $('#salesVeil').classList.remove('open'); });
+document.querySelectorAll('.sfilter button').forEach(b => b.addEventListener('click', () => {
+  salesFilter = b.dataset.f;
+  document.querySelectorAll('.sfilter button').forEach(x => x.classList.toggle('on', x === b));
+  renderSales();
+}));
+$('#salesList').addEventListener('click', e => {
+  const b = e.target.closest('.sale'); if (!b) return;
+  const v = salesData[+b.dataset.i];
+  const c = RIFAS.filter(r => v.grupos[r.id]).map(r => ({ r, nums: v.grupos[r.id] }));
+  const total = c.reduce((a,g)=>a+g.nums.length,0) * PRECIO;
+  showReceipt({ ...v, folio: v.folio || 'Sin folio', total }, c, false);
+});
 
 /* ================== INICIO ================== */
 buildPanels();
