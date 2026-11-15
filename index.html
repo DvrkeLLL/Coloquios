@@ -114,6 +114,28 @@ h1{font-weight:900;font-size:32px;line-height:1.05;margin:6px 0 0;letter-spacing
 .notice svg{flex-shrink:0;margin-top:1px}
 .n.sold{background:var(--soldBg);color:var(--soldFg);text-decoration:line-through;cursor:not-allowed;box-shadow:none}
 
+/* Carga de la grilla (solo la tabla de números) */
+.board{position:relative}
+.board.loading .grid{pointer-events:none}
+.board.loading .n{color:transparent;text-decoration:none;background:var(--track);box-shadow:none;position:relative;overflow:hidden}
+.board.loading .n::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.7) 50%,transparent 70%);transform:translateX(-100%);animation:shine 1.6s ease-in-out infinite;animation-delay:calc(var(--i) * 25ms)}
+@keyframes shine{to{transform:translateX(100%)}}
+.loader{position:absolute;inset:0;display:none;align-items:center;justify-content:center}
+.board.loading .loader{display:flex}
+.pill{display:flex;flex-direction:column;align-items:center;gap:10px;background:#fff;border-radius:24px;padding:20px 26px;box-shadow:0 12px 30px rgba(35,27,58,.14)}
+.pill span{font-size:14px;font-weight:800;color:var(--muted)}
+.hourglass{width:56px;height:56px;color:var(--accent);animation:flip 2.4s cubic-bezier(.6,0,.4,1) infinite}
+.hourglass .frame{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hourglass .sand{fill:currentColor;opacity:.85}
+.hourglass .top{animation:drainTop 2.4s linear infinite}
+.hourglass .bottom{animation:fillBottom 2.4s linear infinite}
+.hourglass .stream{stroke:currentColor;stroke-width:1;stroke-dasharray:1 1.2;animation:stream 2.4s linear infinite}
+@keyframes flip{0%,78%{transform:rotate(0)}100%{transform:rotate(180deg)}}
+@keyframes drainTop{0%{transform:translateY(0)}78%,100%{transform:translateY(8px)}}
+@keyframes fillBottom{0%{transform:translateY(8px)}78%,100%{transform:translateY(0)}}
+@keyframes stream{0%,74%{opacity:1;stroke-dashoffset:0}75%,100%{opacity:0;stroke-dashoffset:-6}}
+@media (prefers-reduced-motion: reduce){ .hourglass,.hourglass *{animation-duration:6s} .board.loading .n::after{animation:none} }
+
 .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
 .legend span{display:flex;align-items:center;gap:8px}
 .legend i{width:16px;height:16px;border-radius:6px;display:inline-block}
@@ -462,6 +484,16 @@ const ICON = {
   check: S('<path d="M20 6L9 17l-5-5"/>'),
   checkCircle: S('<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>')
 };
+const HOURGLASS = `<svg class="hourglass" viewBox="0 0 24 24" aria-hidden="true">
+  <defs>
+    <clipPath id="hgTop"><path d="M8.2 4.5h7.6c0 3.2-2.3 4.6-3.8 7.2-1.5-2.6-3.8-4-3.8-7.2z"/></clipPath>
+    <clipPath id="hgBottom"><path d="M8.2 19.5h7.6c0-3.2-2.3-4.6-3.8-7.2-1.5 2.6-3.8 4-3.8 7.2z"/></clipPath>
+  </defs>
+  <g clip-path="url(#hgTop)"><rect class="sand top" x="6" y="4" width="12" height="8"/></g>
+  <g clip-path="url(#hgBottom)"><rect class="sand bottom" x="6" y="12" width="12" height="8"/></g>
+  <line class="stream" x1="12" y1="12" x2="12" y2="19"/>
+  <path class="frame" d="M6.5 3h11M6.5 21h11M8 3c0 4.2 2.6 5.6 4 9-1.4 3.4-4 4.8-4 9M16 3c0 4.2-2.6 5.6-4 9 1.4 3.4 4 4.8 4 9"/>
+</svg>`;
 const CANALES = [['WhatsApp','wsp'],['Instagram','ig'],['Facebook','fb'],['Otro','otro']];
 
 /* ================== ESTADO ================== */
@@ -485,6 +517,7 @@ function applyState(st){
   if (!st) return;
   RIFAS.forEach(r => { if (st[r.id]) db.rifas[r.id] = { sold: st[r.id].sold || {} }; });
   ready = true;
+  document.querySelectorAll('.board.loading').forEach(b => { b.classList.remove('loading'); b.setAttribute('aria-busy','false'); });
   // si otro vendedor vendió algo que tenías elegido, se quita de tu selección
   const lost = [];
   RIFAS.forEach(r => sel[r.id].forEach(n => { if (db.rifas[r.id].sold[n]){ sel[r.id].delete(n); lost.push(`${pad(n)} de la ${r.nombre}`); } }));
@@ -530,7 +563,12 @@ function buildPanels(){
       <div class="ranges" data-r="${i}">
         ${['1–50','51–100','101–150'].map((l,k)=>`<button data-k="${k}" class="${k===0?'on':''}">${l}</button>`).join('')}
       </div>
-      <div class="grid" id="grid${i}"></div>
+      <div class="board${API_URL ? ' loading' : ''}" aria-busy="${API_URL ? 'true' : 'false'}">
+        <div class="grid" id="grid${i}"></div>
+        <div class="loader" role="status">
+          <div class="pill">${HOURGLASS}<span>Cargando números…</span></div>
+        </div>
+      </div>
       <div class="legend">
         <span><i style="background:var(--surface)"></i>Disponible</span>
         <span><i style="background:var(--mine)"></i>Tu selección</span>
@@ -550,7 +588,7 @@ function renderGrid(i){
     let cls = '', label = 'disponible';
     if (st.sold[n]) { cls='sold'; label='vendido'; }
     else if (sel[r.id].has(n)) { cls='mine'; label='seleccionado por ti'; }
-    html += `<button class="n ${cls}" data-n="${n}" aria-label="Número ${n}, ${label}" aria-pressed="${cls==='mine'}">${pad(n)}</button>`;
+    html += `<button class="n ${cls}" style="--i:${n-start-1}" data-n="${n}" aria-label="Número ${n}, ${label}" aria-pressed="${cls==='mine'}">${pad(n)}</button>`;
   }
   $('#grid'+i).innerHTML = html;
   const vend = Object.keys(st.sold).length;
@@ -908,7 +946,7 @@ $('#salesList').addEventListener('click', e => {
 buildPanels();
 renderSellers();
 renderAll();
-if (API_URL){ toast('Cargando el tablero…'); refresh(); }
+if (API_URL) refresh();
 else $('#offline').hidden = false;
 </script>
 </body>
