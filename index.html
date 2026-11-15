@@ -220,6 +220,49 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 .tag.paid{background:#E3F4EA;color:var(--mine)}
 .tag.unpaid{background:#FFF4D6;color:#8A5A0F}
 .sempty{text-align:center;padding:30px 10px;color:var(--muted);font-weight:700;font-size:14px}
+/* Teclado de clave */
+.pinbox{width:100%;max-width:360px;margin:auto 16px;background:var(--surface);border-radius:28px;padding:22px 18px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;animation:up .22s ease-out}
+.pinbox h3{margin:6px 0 0;font-size:24px;font-weight:900}
+.pinbox p{margin:0;font-size:14px;font-weight:600;color:var(--muted);line-height:1.4}
+.av.big{width:60px;height:60px;border-radius:50%;background:var(--accentSoft);color:var(--accent);display:grid;place-items:center;font-weight:900;font-size:19px}
+.pdots{display:flex;gap:14px;margin:10px 0 2px}
+.pdots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--accent);transition:background .1s}
+.pdots i.f{background:var(--accent)}
+.pdots.err i{border-color:#C42B2B}.pdots.err i.f{background:#C42B2B}
+.pdots.err{animation:shake .4s}
+.pinbox .pmsg{min-height:20px;font-weight:800}
+.pinbox .pmsg.bad{color:#C42B2B}.pinbox .pmsg.good{color:var(--mine)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin-top:6px}
+.keypad button{height:58px;border:0;border-radius:18px;background:var(--track);font:900 22px var(--font);color:var(--ink);cursor:pointer}
+.keypad button:active{background:var(--accentSoft)}
+.keypad button:disabled{opacity:.5}
+.keypad .kx{background:transparent;font-size:14px;font-weight:800;color:var(--accent);display:grid;place-items:center}
+
+/* Editar ventas */
+.ehead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.who{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 4px;border-radius:99px;background:var(--accentSoft);color:var(--accent);font-size:13px;font-weight:800}
+.who .av{width:26px;height:26px;font-size:10px;background:#fff}
+.linkbtn{border:0;background:none;color:var(--accent);font:800 14px var(--font);cursor:pointer;padding:8px}
+.lock{width:16px;height:16px;color:var(--muted)}
+.ecard{background:var(--surface);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.ekv{display:grid;grid-template-columns:90px 1fr;gap:6px 10px;font-size:14px}
+.ekv span{color:var(--muted);font-weight:600}.ekv b{font-weight:800;word-break:break-word}
+.acts{display:flex;flex-direction:column;gap:8px}
+.acts .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn.green{background:var(--mine)}
+.btn.ghost{background:var(--track);color:var(--ink)}
+.btn.soft-danger{background:#FBE4E4;color:#C42B2B}
+.btn.danger{background:#C42B2B}
+.warn{width:52px;height:52px;border-radius:50%;background:#FBE4E4;color:#C42B2B;display:grid;place-items:center}
+.delp{margin:0 0 16px;font-size:14px;font-weight:600;color:var(--muted);line-height:1.45}
+.xchips{display:flex;flex-wrap:wrap;gap:6px}
+.xchip{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 10px;border-radius:12px;border:0;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font:800 15px var(--font);color:var(--ink);cursor:pointer}
+.xchip small{font-size:11px;color:var(--muted)}
+.xchip svg{width:14px;height:14px;color:#C42B2B}
+.xchip.off{background:#FBE4E4;box-shadow:none;color:#C42B2B;text-decoration:line-through}
+.xchip.off svg{display:none}
+.ehint{font-size:12px;font-weight:700;color:var(--muted);margin-top:6px}
+
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
 .receipt .rh{background:var(--accent);color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
 .receipt .rh .eyebrow{color:rgba(255,255,255,.8)}
@@ -259,6 +302,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     </button>
     <div class="menu" id="menu" role="menu">
       <button id="salesBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Ventas y tickets</button>
+      <button id="editBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>Editar ventas</button>
       <button id="sheetBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Abrir planilla</button>
       <button id="refreshBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Actualizar tablero</button>
     </div>
@@ -386,6 +430,23 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
   </div>
 </div>
 
+<!-- Editar ventas (requiere clave) -->
+<div class="veil" id="editVeil">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="grab"></div>
+    <header>
+      <div>
+        <div class="eyebrow" id="editEyebrow">Editar ventas</div>
+        <h3 id="editTitle">Tus ventas</h3>
+      </div>
+      <button class="iconbtn" id="closeEdit" aria-label="Cerrar">
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+    <div id="editBody"></div>
+  </div>
+</div>
+
 <!-- Comprobante -->
 <div class="veil center" id="receiptVeil">
   <div class="receipt" role="dialog" aria-modal="true" aria-labelledby="rTitle">
@@ -419,6 +480,35 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 </div>
 
 <canvas id="confetti" aria-hidden="true"></canvas>
+
+<!-- Confirmar eliminación -->
+<div class="veil" id="delVeil">
+  <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="delTitle">
+    <div class="warn"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></div>
+    <h3 id="delTitle" style="font-size:24px;margin:12px 0 8px"></h3>
+    <p class="delp" id="delText"></p>
+    <div class="acts">
+      <button class="btn full danger" id="delYes">Sí, eliminar</button>
+      <button class="btn full ghost" id="delNo">No, volver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Teclado de clave -->
+<div class="veil center" id="pinVeil">
+  <div class="pinbox" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+    <span class="av big" id="pinAv"></span>
+    <h3 id="pinTitle"></h3>
+    <p id="pinSub"></p>
+    <div class="pdots" id="pinDots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <p class="pmsg" id="pinMsg" role="alert"></p>
+    <div class="keypad" id="pinPad">
+      <button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button>
+      <button class="kx" data-cancel>Cancelar</button><button>0</button>
+      <button class="kx" data-del aria-label="Borrar"><svg class="i" viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12z"/><path d="M17 9l-6 6M11 9l6 6"/></svg></button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast" role="status"></div>
 
@@ -941,6 +1031,246 @@ $('#salesList').addEventListener('click', e => {
   const total = c.reduce((a,g)=>a+g.nums.length,0) * PRECIO;
   showReceipt({ ...v, folio: v.folio || 'Sin folio', total }, c, false);
 });
+
+/* ================== CLAVE DE VENDEDOR ==================
+   La clave solo se pide para "Editar ventas". Se valida en el servidor (Apps Script);
+   en la planilla se guarda cifrada (hash), nunca el número real. */
+const SESSION_KEY = 'rifa_sesion';
+function getSession(){
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    if (s && s.vendedor === vendedor && s.expira > Date.now()) return s;
+  } catch(e){}
+  return null;
+}
+function setSession(res){ localStorage.setItem(SESSION_KEY, JSON.stringify({ token:res.token, expira:res.expira, vendedor })); }
+function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+
+// Abre el teclado. validate(pin) devuelve {ok} o {msg}; el teclado sigue abierto hasta que sea ok o se cancele.
+function askPin({ title, sub, validate }){
+  return new Promise(resolve => {
+    let pin = '', working = false;
+    const veil = $('#pinVeil'), dots = [...document.querySelectorAll('#pinDots i')], box = $('#pinDots'), msg = $('#pinMsg');
+    $('#pinAv').textContent = initials(vendedor);
+    $('#pinTitle').textContent = title; $('#pinSub').textContent = sub || '';
+    msg.textContent = ''; msg.className = 'pmsg';
+    const paint = () => dots.forEach((d,i) => d.classList.toggle('f', i < pin.length));
+    paint(); veil.classList.add('open');
+    const close = val => { veil.classList.remove('open'); pad.removeEventListener('click', onClick); document.removeEventListener('keydown', onKey); resolve(val); };
+    const press = async k => {
+      if (working) return;
+      if (k === 'cancel') return close(null);
+      if (k === 'del'){ pin = pin.slice(0,-1); box.classList.remove('err'); paint(); return; }
+      if (pin.length >= 4) return;
+      pin += k; box.classList.remove('err'); msg.textContent = ''; paint();
+      if (pin.length < 4) return;
+      working = true; msg.className = 'pmsg'; msg.textContent = 'Revisando…';
+      let r;
+      try { r = await validate(pin); } catch(e){ r = { msg:'Sin conexión, intenta de nuevo' }; }
+      working = false;
+      if (r && r.ok){ msg.className = 'pmsg good'; msg.textContent = r.okMsg || 'Listo'; setTimeout(() => close(pin), 350); }
+      else { msg.className = 'pmsg bad'; msg.textContent = (r && r.msg) || 'Clave incorrecta'; box.classList.add('err'); pin = ''; setTimeout(paint, 400); if (r && r.close) setTimeout(() => close(null), 1200); }
+    };
+    const pad = $('#pinPad');
+    const onClick = e => { const b = e.target.closest('button'); if (!b) return;
+      press(b.hasAttribute('data-cancel') ? 'cancel' : b.hasAttribute('data-del') ? 'del' : b.textContent.trim()); };
+    const onKey = e => { if (/^\d$/.test(e.key)) press(e.key); else if (e.key === 'Backspace') press('del'); else if (e.key === 'Escape') press('cancel'); };
+    pad.addEventListener('click', onClick); document.addEventListener('keydown', onKey);
+  });
+}
+
+async function ensureLogin(){
+  if (getSession()) return true;
+  let st;
+  try { st = await api('pinStatus', { vendedor }); } catch(e){ toast('Sin conexión, intenta de nuevo'); return false; }
+  if (st.registrado){
+    const ok = await askPin({ title:`Hola, ${vendedor.split(' ')[0]}`, sub:'Ingresa tu clave para editar ventas',
+      validate: async pin => { const r = await api('login', { vendedor, pin }); if (r.ok){ setSession(r); return { ok:true, okMsg:'¡Listo!' }; } return { msg:r.msg, close:r.bloqueado }; } });
+    return !!ok;
+  }
+  // primera vez: crear clave
+  let first = null;
+  const created = await askPin({ title:'Crea tu clave', sub:'4 números que solo tú sepas. La usarás para editar o eliminar tus ventas.',
+    validate: async pin => { first = pin; return { ok:true, okMsg:'Ahora repítela' }; } });
+  if (!created) return false;
+  const confirmed = await askPin({ title:'Repite tu clave', sub:'Escríbela de nuevo para confirmar',
+    validate: async pin => {
+      if (pin !== first) return { msg:'No coincide, intenta de nuevo' };
+      const r = await api('register', { vendedor, pin });
+      if (r.ok){ setSession(r); return { ok:true, okMsg:'Clave creada' }; }
+      return { msg:r.msg };
+    } });
+  return !!confirmed;
+}
+
+/* ================== EDITAR VENTAS ================== */
+let myData = [], editing = null;
+const LOCK = '<svg class="i lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const countOf = v => Object.values(v.grupos).reduce((x,g)=>x+g.length,0);
+const numsText = v => RIFAS.filter(r => v.grupos[r.id]).map(r => `${r.nombre}: ${v.grupos[r.id].map(pad).join(', ')}`).join(' · ');
+
+async function openEditor(){
+  $('#menu').classList.remove('open');
+  if (!API_URL){ toast('La venta aún no está habilitada'); return; }
+  if (!vendedor){ needSeller(); return; }
+  if (!(await ensureLogin())) return;
+  $('#editVeil').classList.add('open');
+  loadMine();
+}
+async function loadMine(){
+  editing = null;
+  $('#editEyebrow').textContent = 'Editar ventas'; $('#editTitle').textContent = 'Tus ventas';
+  $('#editBody').innerHTML = whoBar() + '<div class="sempty">Cargando tus ventas…</div>';
+  try {
+    const res = await api('sales'); if (!res.ok) throw 0;
+    myData = (res.ventas || []).filter(v => v.vendedor === vendedor);
+    renderMine();
+  } catch(e){ $('#editBody').innerHTML = whoBar() + '<div class="sempty">No se pudieron cargar las ventas. Intenta de nuevo</div>'; }
+}
+function whoBar(){
+  return `<div class="ehead"><span class="who"><span class="av">${initials(vendedor)}</span>${esc(firstName(vendedor))}</span><button class="linkbtn" data-act="logout">Salir</button></div>`;
+}
+function renderMine(){
+  const pend = myData.filter(v => v.estado !== 'Pagado').length;
+  const tot = myData.reduce((a,v)=>a+countOf(v),0);
+  $('#editBody').innerHTML = whoBar() +
+    `<p class="scount">${myData.length} ${myData.length===1?'venta':'ventas'} · ${tot} números · ${pend} ${pend===1?'pendiente':'pendientes'} de pago</p>` +
+    (myData.length ? '<div class="slist">' + myData.map((v,i) => `
+      <button class="sale" data-act="open" data-i="${i}">
+        <div class="sm"><b>${esc(v.comprador || 'Sin nombre')}</b><span>${esc(numsText(v))}</span><span>${esc(v.fecha || '')}</span></div>
+        <div class="sr"><b>${fmt(countOf(v)*PRECIO)}</b><span class="tag ${v.estado==='Pagado'?'paid':'unpaid'}">${v.estado==='Pagado'?'Pagado':'Pendiente'}</span></div>
+      </button>`).join('') + '</div>' : '<div class="sempty">Aún no tienes ventas</div>');
+}
+function renderDetail(v){
+  editing = v;
+  const paid = v.estado === 'Pagado';
+  $('#editEyebrow').textContent = v.folio ? `Folio ${v.folio}` : 'Venta sin folio';
+  $('#editTitle').textContent = v.comprador || 'Sin nombre';
+  const chips = RIFAS.filter(r => v.grupos[r.id]).map(r => `<div class="grp"><small><span>${esc(r.nombre)}</span></small><div class="chips">${v.grupos[r.id].map(n=>`<span class="chip" style="background:var(--accent)">${pad(n)}</span>`).join('')}</div></div>`).join('');
+  $('#editBody').innerHTML = `
+    <div class="ecard">
+      <span class="tag ${paid?'paid':'unpaid'}" style="align-self:flex-start">${paid?'Pagado':'Pendiente de pago'}</span>
+      ${chips}
+      <div class="ekv"><span>Contacto</span><b>${esc(v.telefono)}</b><span>Total</span><b>${fmt(countOf(v)*PRECIO)}</b><span>Fecha</span><b>${esc(v.fecha)}</b></div>
+    </div>
+    <div class="acts">
+      ${paid ? '' : `<button class="btn full green" data-act="pay">${ICON.checkCircle}Confirmar pago</button>`}
+      <div class="two">
+        <button class="btn ghost" data-act="form"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Editar</button>
+        <button class="btn ghost" data-act="ticket"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/></svg>Ver ticket</button>
+      </div>
+      <button class="btn full soft-danger" data-act="del"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Eliminar venta</button>
+      <button class="linkbtn" data-act="back">← Volver a tus ventas</button>
+    </div>`;
+}
+function renderForm(v){
+  const digits = v.telefono.replace(/\D/g,'').replace(/^569/,'');
+  const chips = RIFAS.filter(r => v.grupos[r.id]).map(r => v.grupos[r.id].map(n =>
+    `<button type="button" class="xchip" data-r="${r.id}" data-n="${n}" aria-pressed="false">${pad(n)}<small>${esc(r.nombre)}</small><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`).join('')).join('');
+  $('#editEyebrow').textContent = 'Editar venta';
+  $('#editBody').innerHTML = `
+    <form id="editForm" novalidate>
+      <div class="field"><span class="lbl">Números</span><div class="xchips">${chips}</div>
+        <span class="ehint">Toca un número para quitarlo de la venta; quedará disponible.</span></div>
+      <div class="field" data-f="nombre"><label for="eNombre">Nombre del comprador</label>
+        <input class="inp" id="eNombre" autocapitalize="words" value="${esc(v.comprador)}"><span class="err">Escribe el nombre</span></div>
+      <div class="field" data-f="telefono"><label for="eTel">Número de contacto</label>
+        <div class="phone"><span class="pre">+56 9</span><input id="eTel" type="tel" inputmode="numeric" maxlength="9" value="${digits.length===8 ? digits.slice(0,4)+' '+digits.slice(4) : esc(digits)}"></div>
+        <span class="err">Son 8 números después del +56 9</span></div>
+      <div class="field"><span class="lbl">Estado del pago</span>
+        <div class="choices two">
+          <input type="radio" name="eEstado" id="ee0" value="Pagado" ${v.estado==='Pagado'?'checked':''}><label for="ee0" class="paid">${ICON.checkCircle}Pagado</label>
+          <input type="radio" name="eEstado" id="ee1" value="Pendiente de pago" ${v.estado!=='Pagado'?'checked':''}><label for="ee1" class="unpaid"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pendiente de pago</label>
+        </div></div>
+      <div class="acts">
+        <button class="btn full" type="submit">Guardar cambios</button>
+        <button class="btn full ghost" type="button" data-act="cancelform">Cancelar</button>
+      </div>
+    </form>`;
+  $('#eNombre').addEventListener('input', e => { const el = e.target, p = el.selectionStart;
+    const val = el.value.replace(/(^|[\s-])(\S)/g, (m,a,c) => a + c.toLocaleUpperCase('es-CL')); if (val !== el.value){ el.value = val; el.setSelectionRange(p,p); } });
+  $('#eTel').addEventListener('input', e => { const d = e.target.value.replace(/\D/g,'').slice(0,8); e.target.value = d.length > 4 ? d.slice(0,4)+' '+d.slice(4) : d; });
+  $('#editForm').addEventListener('submit', saveForm);
+}
+
+// Llama al servidor; si la sesión venció, pide la clave de nuevo y reintenta una vez
+async function secured(action, data){
+  let s = getSession(); if (!s && !(await ensureLogin())) return null;
+  let res = await api(action, { ...data, sesion:getSession().token });
+  if (res.sesion === false){ clearSession(); if (!(await ensureLogin())) return null; res = await api(action, { ...data, sesion:getSession().token }); }
+  applyState(res.state);
+  return res;
+}
+
+async function saveForm(e){
+  e.preventDefault();
+  const v = editing, nombre = $('#eNombre').value.trim(), d = $('#eTel').value.replace(/\D/g,'');
+  const ok = { nombre: nombre.length >= 2, telefono: d.length === 8 };
+  document.querySelectorAll('#editForm .field[data-f]').forEach(f => f.classList.toggle('bad', !ok[f.dataset.f]));
+  if (!ok.nombre || !ok.telefono) return;
+  const quitar = {}; let nq = 0;
+  document.querySelectorAll('#editForm .xchip.off').forEach(c => { (quitar[c.dataset.r] = quitar[c.dataset.r] || []).push(+c.dataset.n); nq++; });
+  if (nq === countOf(v)){ toast('Para quitar todos los números usa "Eliminar venta"'); return; }
+  const btn = e.target.querySelector('[type=submit]'); btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const res = await secured('updateSale', { clave:v.clave, comprador:nombre, telefono:'+56 9 ' + d.slice(0,4) + ' ' + d.slice(4),
+      estado:document.querySelector('input[name=eEstado]:checked').value, quitar });
+    if (!res) return;
+    if (!res.ok){ toast(res.msg); return; }
+    toast('Cambios guardados','check'); await loadMine();
+  } catch(err){ toast('No se pudo guardar. Revisa tu conexión'); }
+  finally { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
+}
+
+async function payNow(btn){
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const res = await secured('updateSale', { clave:editing.clave, estado:'Pagado' });
+    if (!res) return;
+    if (!res.ok){ toast(res.msg); return; }
+    toast('Pago confirmado','check'); await loadMine();
+  } catch(e){ toast('No se pudo guardar. Revisa tu conexión'); btn.disabled = false; }
+}
+
+function askDelete(){
+  const v = editing;
+  $('#delTitle').textContent = `¿Eliminar la venta de ${v.comprador || 'este comprador'}?`;
+  $('#delText').textContent = `Los números ${numsText(v)} volverán a estar disponibles. Esto no se puede deshacer.`;
+  $('#delVeil').classList.add('open');
+}
+$('#delNo').addEventListener('click', () => $('#delVeil').classList.remove('open'));
+$('#delYes').addEventListener('click', async () => {
+  $('#delVeil').classList.remove('open');
+  const v = editing;
+  const done = await askPin({ title:'Confirma con tu clave', sub:'Para eliminar la venta',
+    validate: async pin => {
+      const res = await secured('deleteSale', { clave:v.clave, pin });
+      if (!res) return { msg:'Sesión cerrada', close:true };
+      return res.ok ? { ok:true, okMsg:'Venta eliminada' } : { msg:res.msg };
+    } });
+  if (done){ toast('Venta eliminada; los números quedaron disponibles','check'); loadMine(); }
+});
+
+$('#editBody').addEventListener('click', e => {
+  const chip = e.target.closest('.xchip');
+  if (chip){ chip.classList.toggle('off'); chip.setAttribute('aria-pressed', chip.classList.contains('off')); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'open') renderDetail(myData[+b.dataset.i]);
+  else if (act === 'back') loadMine();
+  else if (act === 'form') renderForm(editing);
+  else if (act === 'cancelform') renderDetail(editing);
+  else if (act === 'pay') payNow(b);
+  else if (act === 'del') askDelete();
+  else if (act === 'ticket'){
+    const v = editing, c = RIFAS.filter(r => v.grupos[r.id]).map(r => ({ r, nums:v.grupos[r.id] }));
+    showReceipt({ ...v, folio:v.folio || 'Sin folio', total:countOf(v)*PRECIO }, c, false);
+  }
+  else if (act === 'logout'){ clearSession(); $('#editVeil').classList.remove('open'); toast('Sesión cerrada','check'); }
+});
+$('#editBtn').addEventListener('click', openEditor);
+$('#closeEdit').addEventListener('click', () => $('#editVeil').classList.remove('open'));
+$('#editVeil').addEventListener('click', e => { if (e.target.id === 'editVeil') $('#editVeil').classList.remove('open'); });
 
 /* ================== INICIO ================== */
 buildPanels();
