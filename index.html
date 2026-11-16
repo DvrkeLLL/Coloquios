@@ -240,7 +240,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 
 /* Editar ventas */
 .ehead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.who{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 4px;border-radius:99px;background:var(--accentSoft);color:var(--accent);font-size:13px;font-weight:800}
+.who{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:99px;background:var(--accentSoft);color:var(--accent);font-size:13px;font-weight:800}
 .who .av{width:26px;height:26px;font-size:10px;background:#fff}
 .linkbtn{border:0;background:none;color:var(--accent);font:800 14px var(--font);cursor:pointer;padding:8px}
 .lock{width:16px;height:16px;color:var(--muted)}
@@ -490,6 +490,18 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     <div class="acts">
       <button class="btn full danger" id="delYes">Sí, eliminar</button>
       <button class="btn full ghost" id="delNo">No, volver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Abrir planilla (después de la clave) -->
+<div class="veil" id="goVeil">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="goTitle">
+    <h3 id="goTitle" style="font-size:24px;margin:4px 0 8px">Planilla lista</h3>
+    <p class="delp">Se abrirá en Google Sheets en una pestaña nueva.</p>
+    <div class="acts">
+      <a class="btn full" id="goOpen" href="https://docs.google.com/spreadsheets/d/1Tc9rsnZGp9_4Gb9VREAvBJy2k5iKhrr92uWV06gobGk/edit" target="_blank" rel="noopener" style="text-decoration:none"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Abrir planilla</a>
+      <button class="btn full ghost" id="goClose">Cerrar</button>
     </div>
   </div>
 </div>
@@ -766,7 +778,17 @@ document.addEventListener('visibilitychange', refresh);
 // Menú
 $('#menuBtn').addEventListener('click', () => { const m=$('#menu'); m.classList.toggle('open'); $('#menuBtn').setAttribute('aria-expanded', m.classList.contains('open')); });
 document.addEventListener('click', e => { if (!e.target.closest('#menu') && !e.target.closest('#menuBtn')) $('#menu').classList.remove('open'); });
-$('#sheetBtn').addEventListener('click', () => { window.open(SHEET_URL, '_blank', 'noopener'); $('#menu').classList.remove('open'); });
+$('#sheetBtn').addEventListener('click', async () => {
+  $('#menu').classList.remove('open');
+  if (!API_URL){ toast('La venta aún no está habilitada'); return; }
+  if (!vendedor){ needSeller(); return; }
+  if (!(await ensureLogin(true))) return; // la clave se pide cada vez
+  // el navegador solo deja abrir pestañas desde un toque, por eso se muestra un botón para abrirla
+  $('#goVeil').classList.add('open');
+});
+$('#goOpen').href = SHEET_URL;
+$('#goOpen').addEventListener('click', () => $('#goVeil').classList.remove('open'));
+$('#goClose').addEventListener('click', () => $('#goVeil').classList.remove('open'));
 $('#refreshBtn').addEventListener('click', () => { $('#menu').classList.remove('open'); mut++; refresh().then(() => toast('Tablero actualizado','check')); });
 
 /* ================== FORMULARIO ================== */
@@ -1079,8 +1101,8 @@ function askPin({ title, sub, validate }){
   });
 }
 
-async function ensureLogin(){
-  if (getSession()) return true;
+async function ensureLogin(force = false){
+  if (!force && getSession()) return true;
   let st;
   try { st = await api('pinStatus', { vendedor }); } catch(e){ toast('Sin conexión, intenta de nuevo'); return false; }
   if (st.registrado){
@@ -1113,7 +1135,7 @@ async function openEditor(){
   $('#menu').classList.remove('open');
   if (!API_URL){ toast('La venta aún no está habilitada'); return; }
   if (!vendedor){ needSeller(); return; }
-  if (!(await ensureLogin())) return;
+  if (!(await ensureLogin(true))) return; // la clave se pide cada vez que se entra
   $('#editVeil').classList.add('open');
   loadMine();
 }
@@ -1128,7 +1150,7 @@ async function loadMine(){
   } catch(e){ $('#editBody').innerHTML = whoBar() + '<div class="sempty">No se pudieron cargar las ventas. Intenta de nuevo</div>'; }
 }
 function whoBar(){
-  return `<div class="ehead"><span class="who"><span class="av">${initials(vendedor)}</span>${esc(firstName(vendedor))}</span><button class="linkbtn" data-act="logout">Salir</button></div>`;
+  return `<div class="ehead"><span class="who">${esc(firstName(vendedor))}</span><button class="linkbtn" data-act="logout">Salir</button></div>`;
 }
 function renderMine(){
   const pend = myData.filter(v => v.estado !== 'Pagado').length;
