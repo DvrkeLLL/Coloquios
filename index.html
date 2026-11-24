@@ -309,6 +309,20 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 .medal{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#FFE9A8;color:#8A5A0F;font-size:12px}
 .snote{font-size:12px;font-weight:700;color:var(--muted);margin:4px 2px 0}
 
+.bankA{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.bankA .tl{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0 2px}
+.cardA{border-radius:22px;padding:18px;color:#fff;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 80%,#fff) 0%,var(--accent) 100%);display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;box-shadow:0 10px 24px rgba(60,40,140,.25)}
+.cardA::after{content:"";position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.12)}
+.cardA::before{content:"";position:absolute;left:-30px;bottom:-60px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.07)}
+.cardA>*{position:relative;z-index:1}
+.cardA .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;opacity:.92}
+.cardA .chipc{width:34px;height:26px;border-radius:6px;background:linear-gradient(135deg,#F6E3A1,#D9B85C)}
+.cardA .num{font-size:25px;font-weight:900;letter-spacing:.08em}
+.cardA .name{font-size:14px;font-weight:800;letter-spacing:.03em}
+.cardA .foot{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:700;opacity:.88;flex-wrap:wrap}
+.copyA{height:50px;border:0;border-radius:16px;background:var(--accentSoft);color:var(--accent);font:800 15px var(--font);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;cursor:pointer}
+.copyA.done{background:#E3F4EA;color:var(--mine)}
+
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
 .receipt .rh{background:var(--accent);color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
 .receipt .rh .eyebrow{color:rgba(255,255,255,.8)}
@@ -410,6 +424,18 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
       <div id="formChips" style="display:flex;flex-direction:column;gap:10px"></div>
       <div class="row"><span id="formCount"></span><b id="formTotal"></b></div>
       <div class="by"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Vendido por <b id="formSeller"></b></div>
+    </div>
+
+    <div class="bankA">
+      <span class="tl">Datos para transferir</span>
+      <div class="cardA" aria-label="Cuenta para transferir">
+        <div class="top"><span>Banco Estado</span><span>CuentaRUT</span></div>
+        <div class="chipc" aria-hidden="true"></div>
+        <div class="num">00022084397</div>
+        <div class="name">CATALINA ALEJANDRA LABRA NUNEZ</div>
+        <div class="foot"><span>RUT 22084397-1</span><span>catalina.labra@usach.cl</span></div>
+      </div>
+      <button type="button" class="copyA" id="copyBank"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg><span>Copiar datos para transferir</span></button>
     </div>
 
     <form id="buyForm" novalidate>
@@ -622,6 +648,14 @@ const RIFAS = [
     { nombre:'Set de maquillaje y facial', icono:'maquillaje', img:'' }
   ]}
 ];
+
+/* ================== CUENTA PARA TRANSFERIR (se copia tal cual) ================== */
+const DATOS_TRANSFERENCIA = `CATALINA ALEJANDRA LABRA NUNEZ
+22084397-1
+Banco Estado
+CuentaRUT
+00022084397
+catalina.labra@usach.cl`;
 
 /* ================== CONEXIÓN CON GOOGLE SHEETS ==================
    URL de la aplicación web de Apps Script. Si se deja vacía, la página no permite vender. */
@@ -1498,6 +1532,22 @@ $('#statsBody').addEventListener('click', e => {
   $('#statsVeil').classList.remove('open');
   $('#editVeil').classList.add('open');
   renderDetail(v);
+});
+
+/* ================== COPIAR DATOS DE TRANSFERENCIA ================== */
+async function copiarTexto(t){
+  try { await navigator.clipboard.writeText(t); return true; }
+  catch(e){
+    const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly',''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch(_){} ta.remove(); return ok;
+  }
+}
+$('#copyBank').addEventListener('click', async () => {
+  const b = $('#copyBank');
+  if (await copiarTexto(DATOS_TRANSFERENCIA)){
+    b.classList.add('done'); b.querySelector('span').textContent = 'Datos copiados';
+    setTimeout(() => { b.classList.remove('done'); b.querySelector('span').textContent = 'Copiar datos para transferir'; }, 2000);
+  } else toast('No se pudo copiar; anota los datos de la tarjeta');
 });
 
 /* ================== INICIO ================== */
