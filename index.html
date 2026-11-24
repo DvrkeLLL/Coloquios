@@ -263,6 +263,52 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
 .xchip.off svg{display:none}
 .ehint{font-size:12px;font-weight:700;color:var(--muted);margin-top:6px}
 
+/* Estadísticas */
+.stabs{margin-bottom:14px}
+.shero{border-radius:22px;padding:18px;background:var(--accent);color:#fff;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.shero small{font-size:13px;font-weight:700;opacity:.85}
+.shero b{font-size:38px;font-weight:900;line-height:1}
+.shero .sub{font-size:13px;font-weight:700;opacity:.9}
+.shero .meta{height:8px;border-radius:9px;background:rgba(255,255,255,.25);overflow:hidden;margin-top:6px}
+.shero .meta i{display:block;height:100%;background:#fff;border-radius:9px}
+.shero.amber{background:#FFF4D6;color:#6B4708}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.kpi{background:var(--surface);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.kpi span{font-size:12px;font-weight:700;color:var(--muted)}
+.kpi b{font-size:22px;font-weight:900}
+.kpi em{font-style:normal;font-size:12px;font-weight:800;color:var(--muted)}
+.kpi em.up{color:var(--mine)}.kpi em.warn{color:#B7791F}
+.scard{background:var(--surface);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:12px;margin-bottom:10px}
+.scard h4{margin:0;font-size:15px;font-weight:900}
+.chart{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:120px}
+.chart .col{display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+.chart .col i{width:100%;min-height:3px;border-radius:8px 8px 4px 4px;background:var(--accent)}
+.chart .col i.today{background:var(--mine)}
+.chart .col span{font-size:11px;font-weight:800;color:var(--muted)}
+.chart .col small{font-size:11px;font-weight:900}
+.split{display:flex;height:14px;border-radius:9px;overflow:hidden;background:var(--track)}
+.split i:first-child{background:var(--accent)}.split i:last-child{background:#B9A8F5}
+.slegend{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted)}
+.slegend b{color:var(--ink)}
+.sdot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.pend{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:16px;margin-bottom:8px}
+.pend .t{flex:1;min-width:0;display:flex;flex-direction:column;border:0;background:none;text-align:left;padding:0;cursor:pointer;font:inherit;color:inherit}
+.pend .t b{font-size:14px;font-weight:900}.pend .t span{font-size:12px;font-weight:600;color:var(--muted)}
+.pend .amt{font-weight:900;font-size:14px}
+.wa{width:40px;height:40px;border-radius:12px;background:#E3F4EA;color:var(--mine);display:grid;place-items:center;flex-shrink:0}
+.team3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;margin-bottom:10px}
+.team3 div{background:var(--surface);border-radius:16px;padding:10px 4px}
+.team3 b{display:block;font-size:20px;font-weight:900}.team3 span{font-size:11px;font-weight:700;color:var(--muted)}
+.sbadge{display:inline-block;font-size:12px;font-weight:800;padding:6px 10px;border-radius:99px;background:#FFF4D6;color:#8A5A0F;margin-bottom:10px}
+.rank{display:flex;flex-direction:column;gap:8px}
+.rk{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;font-size:14px;font-weight:800}
+.rk .pos{color:var(--muted);font-weight:900;text-align:center}
+.rk .bw{display:flex;flex-direction:column;gap:3px;min-width:0}
+.rk .bw i{display:block;height:6px;border-radius:9px;background:#DCD3FA;min-width:3px}
+.rk.me{color:var(--accent)}.rk.me .bw i{background:var(--accent)}
+.medal{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#FFE9A8;color:#8A5A0F;font-size:12px}
+.snote{font-size:12px;font-weight:700;color:var(--muted);margin:4px 2px 0}
+
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
 .receipt .rh{background:var(--accent);color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
 .receipt .rh .eyebrow{color:rgba(255,255,255,.8)}
@@ -302,6 +348,7 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     </button>
     <div class="menu" id="menu" role="menu">
       <button id="salesBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Ventas y tickets</button>
+      <button id="statsBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Mis estadísticas</button>
       <button id="editBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>Editar ventas</button>
       <button id="sheetBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Abrir planilla</button>
       <button id="refreshBtn" role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Actualizar tablero</button>
@@ -427,6 +474,27 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
     </div>
     <p class="scount" id="salesCount"></p>
     <div class="slist" id="salesList"></div>
+  </div>
+</div>
+
+<!-- Mis estadísticas (requiere clave) -->
+<div class="veil" id="statsVeil">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+    <div class="grab"></div>
+    <header>
+      <div>
+        <div class="eyebrow">Mis estadísticas</div>
+        <h3 id="statsTitle"></h3>
+      </div>
+      <button class="iconbtn" id="closeStats" aria-label="Cerrar">
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+    <div class="ehead"><span class="who" id="statsWho"></span><button class="linkbtn" id="statsLogout">Salir</button></div>
+    <div class="ranges stabs" role="tablist" aria-label="Secciones">
+      <button class="on" data-t="res">Resumen</button><button data-t="cob">Por cobrar</button><button data-t="eq">Equipo</button>
+    </div>
+    <div id="statsBody"></div>
   </div>
 </div>
 
@@ -1293,6 +1361,144 @@ $('#editBody').addEventListener('click', e => {
 $('#editBtn').addEventListener('click', openEditor);
 $('#closeEdit').addEventListener('click', () => $('#editVeil').classList.remove('open'));
 $('#editVeil').addEventListener('click', e => { if (e.target.id === 'editVeil') $('#editVeil').classList.remove('open'); });
+
+/* ================== MIS ESTADÍSTICAS ================== */
+const META_NUMEROS = 50; // meta personal de números por vendedor (0 = sin meta)
+let statsAll = [], statsTab = 'res';
+const DAY = 86400000;
+const dayStart = t => { const d = new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+function haceDias(ts){
+  if (!ts) return '';
+  const d = Math.round((dayStart(Date.now()) - dayStart(ts)) / DAY);
+  return d <= 0 ? 'hoy' : d === 1 ? 'ayer' : `hace ${d} días`;
+}
+
+async function openStats(){
+  $('#menu').classList.remove('open');
+  if (!API_URL){ toast('La venta aún no está habilitada'); return; }
+  if (!vendedor){ needSeller(); return; }
+  if (!(await ensureLogin(true))) return; // la clave se pide cada vez
+  $('#statsTitle').textContent = `Hola, ${vendedor.split(' ')[0]}`;
+  $('#statsWho').textContent = firstName(vendedor);
+  $('#statsVeil').classList.add('open');
+  $('#statsBody').innerHTML = '<div class="sempty">Calculando…</div>';
+  try {
+    const res = await api('sales'); if (!res.ok) throw 0;
+    statsAll = res.ventas || [];
+    renderStats();
+  } catch(e){ $('#statsBody').innerHTML = '<div class="sempty">No se pudieron cargar los datos. Intenta de nuevo</div>'; }
+}
+
+function renderStats(){
+  document.querySelectorAll('.stabs button').forEach(b => b.classList.toggle('on', b.dataset.t === statsTab));
+  const mine = statsAll.filter(v => v.vendedor === vendedor);
+  if (statsTab === 'res') $('#statsBody').innerHTML = statsResumen(mine);
+  else if (statsTab === 'cob') $('#statsBody').innerHTML = statsCobrar(mine);
+  else $('#statsBody').innerHTML = statsEquipo();
+}
+
+function statsResumen(mine){
+  const nums = mine.reduce((a,v)=>a+countOf(v),0);
+  const paidV = mine.filter(v => v.estado === 'Pagado');
+  const paidN = paidV.reduce((a,v)=>a+countOf(v),0);
+  const pendV = mine.filter(v => v.estado !== 'Pagado');
+  const pendN = nums - paidN;
+  const now = Date.now(), today = dayStart(now);
+  const inRange = (a,b) => mine.filter(v => v.ts >= a && v.ts < b).reduce((x,v)=>x+countOf(v),0);
+  const semana = inRange(today - 6*DAY, today + DAY), pasada = inRange(today - 13*DAY, today - 6*DAY);
+  const diff = semana - pasada;
+  const prom = mine.length ? (nums / mine.length).toLocaleString('es-CL', { maximumFractionDigits:1 }) : '0';
+  // últimos 7 días
+  const dias = ['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+  const cols = Array.from({ length:7 }, (_,k) => { const d0 = today - (6-k)*DAY; return { n: inRange(d0, d0 + DAY), lbl: k === 6 ? 'Hoy' : dias[new Date(d0).getDay()] }; });
+  const max = Math.max(1, ...cols.map(c => c.n));
+  const r1 = mine.reduce((a,v)=>a+((v.grupos.r1||[]).length),0), r2 = nums - r1;
+  const metaPct = META_NUMEROS ? Math.min(100, Math.round(nums / META_NUMEROS * 100)) : 0;
+  return `
+    <div class="shero">
+      <small>Recaudado</small>
+      <b>${fmt(nums*PRECIO)}</b>
+      <span class="sub">${nums} ${nums===1?'número':'números'} · ${mine.length} ${mine.length===1?'venta':'ventas'}</span>
+      ${META_NUMEROS ? `<div class="meta"><i style="width:${metaPct}%"></i></div><span class="sub">${metaPct}% de tu meta de ${META_NUMEROS} números</span>` : ''}
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span>Pagado</span><b>${fmt(paidN*PRECIO)}</b><em class="up">${paidN} ${paidN===1?'número':'números'}</em></div>
+      <div class="kpi"><span>Por cobrar</span><b>${fmt(pendN*PRECIO)}</b><em class="${pendV.length?'warn':''}">${pendV.length} ${pendV.length===1?'comprador':'compradores'}</em></div>
+      <div class="kpi"><span>Últimos 7 días</span><b>${semana}</b><em class="${diff>0?'up':''}">${diff>0?'+':''}${diff} vs semana anterior</em></div>
+      <div class="kpi"><span>Promedio por venta</span><b>${prom}</b><em>números</em></div>
+    </div>
+    <div class="scard">
+      <h4>Números vendidos por día</h4>
+      <div class="chart">${cols.map((c,k)=>`<div class="col"><small>${c.n}</small><i class="${k===6?'today':''}" style="height:${Math.round(c.n/max*100)}%"></i><span>${c.lbl}</span></div>`).join('')}</div>
+    </div>
+    <div class="scard">
+      <h4>Por rifa</h4>
+      <div class="split"><i style="width:${nums? r1/nums*100 : 0}%"></i><i style="width:${nums? r2/nums*100 : 0}%"></i></div>
+      <div class="slegend"><span><span class="sdot" style="background:var(--accent)"></span>${esc(RIFAS[0].nombre)} · <b>${r1}</b></span><span><span class="sdot" style="background:#B9A8F5"></span>${esc(RIFAS[1].nombre)} · <b>${r2}</b></span></div>
+    </div>`;
+}
+
+function recordatorio(v){
+  const txt = `Hola ${v.comprador.split(' ')[0]}, te escribo por la Rifa Coloquios. Te recuerdo que quedó pendiente el pago de tus números (${numsText(v)}), ${fmt(countOf(v)*PRECIO)} en total. ¡Muchas gracias por apoyarnos!`;
+  return 'https://wa.me/' + v.telefono.replace(/\D/g,'') + '?text=' + encodeURIComponent(txt);
+}
+function statsCobrar(mine){
+  const pend = mine.filter(v => v.estado !== 'Pagado').sort((a,b) => a.ts - b.ts);
+  const n = pend.reduce((a,v)=>a+countOf(v),0);
+  if (!pend.length) return `<div class="shero amber"><small>Te deben</small><b>$0</b><span class="sub">Todo cobrado</span></div>`;
+  return `
+    <div class="shero amber"><small>Te deben</small><b>${fmt(n*PRECIO)}</b><span class="sub">${n} ${n===1?'número':'números'} · ${pend.length} ${pend.length===1?'comprador':'compradores'}</span></div>
+    ${pend.map(v => `<div class="pend">
+      <button class="t" data-clave="${esc(v.clave)}"><b>${esc(v.comprador || 'Sin nombre')}</b><span>${esc(numsText(v))} · ${haceDias(v.ts)}</span></button>
+      <span class="amt">${fmt(countOf(v)*PRECIO)}</span>
+      <a class="wa" href="${recordatorio(v)}" target="_blank" rel="noopener" aria-label="Recordar pago por WhatsApp">${WSP_ICON}</a>
+    </div>`).join('')}
+    <p class="snote">Toca una venta para marcarla como pagada.</p>`;
+}
+
+function statsEquipo(){
+  const totalN = TOTAL_NUMEROS * RIFAS.length;
+  const vend = RIFAS.reduce((a,r)=>a+Object.keys(db.rifas[r.id].sold).length,0);
+  const porV = {}; VENDEDORES.forEach(v => porV[v] = 0);
+  statsAll.forEach(v => { if (porV[v.vendedor] !== undefined) porV[v.vendedor] += countOf(v); });
+  const rank = Object.entries(porV).sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const max = Math.max(1, rank[0][1]);
+  const pos = rank.findIndex(([n]) => n === vendedor);
+  const mineN = porV[vendedor] || 0;
+  let badge;
+  if (pos === 0 && mineN > 0) badge = 'Vas en el 1.er lugar';
+  else if (pos > 0){ const falta = rank[pos-1][1] - mineN + 1; badge = `Vas en el ${pos+1}.º lugar · te ${falta===1?'falta 1':`faltan ${falta}`} para subir`; }
+  return `
+    <div class="team3">
+      <div><b>${vend}</b><span>de ${totalN} vendidos</span></div>
+      <div><b>${fmt(vend*PRECIO)}</b><span>recaudado</span></div>
+      <div><b>${Math.round(vend/totalN*100)}%</b><span>avance</span></div>
+    </div>
+    ${badge ? `<span class="sbadge">${badge}</span>` : ''}
+    <div class="scard">
+      <h4>Ranking de números vendidos</h4>
+      <div class="rank">${rank.map(([n,c],i) => `
+        <div class="rk ${n===vendedor?'me':''}"><span class="pos">${i===0 && c>0 ? '<span class="medal">1</span>' : i+1}</span>
+          <div class="bw">${esc(firstName(n))}${n===vendedor?' (tú)':''}<i style="width:${c/max*100}%"></i></div><span>${c}</span></div>`).join('')}
+      </div>
+    </div>
+    <p class="snote">El total del equipo incluye ventas anotadas a mano en la planilla; el ranking cuenta solo las hechas desde la página.</p>`;
+}
+
+$('#statsBtn').addEventListener('click', openStats);
+$('#closeStats').addEventListener('click', () => $('#statsVeil').classList.remove('open'));
+$('#statsVeil').addEventListener('click', e => { if (e.target.id === 'statsVeil') $('#statsVeil').classList.remove('open'); });
+$('#statsLogout').addEventListener('click', () => { clearSession(); $('#statsVeil').classList.remove('open'); toast('Sesión cerrada','check'); });
+document.querySelectorAll('.stabs button').forEach(b => b.addEventListener('click', () => { statsTab = b.dataset.t; renderStats(); }));
+$('#statsBody').addEventListener('click', e => {
+  const b = e.target.closest('.pend .t'); if (!b) return;
+  // abre la venta en "Editar ventas" (la sesión ya está iniciada)
+  const v = statsAll.find(x => x.clave === b.dataset.clave); if (!v) return;
+  myData = statsAll.filter(x => x.vendedor === vendedor);
+  $('#statsVeil').classList.remove('open');
+  $('#editVeil').classList.add('open');
+  renderDetail(v);
+});
 
 /* ================== INICIO ================== */
 buildPanels();
