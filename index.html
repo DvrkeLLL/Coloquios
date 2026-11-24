@@ -1363,7 +1363,7 @@ $('#closeEdit').addEventListener('click', () => $('#editVeil').classList.remove(
 $('#editVeil').addEventListener('click', e => { if (e.target.id === 'editVeil') $('#editVeil').classList.remove('open'); });
 
 /* ================== MIS ESTADÍSTICAS ================== */
-const META_NUMEROS = 50; // meta personal de números por vendedor (0 = sin meta)
+const META_NUMEROS = 30; // meta personal de números por vendedor (0 = sin meta)
 let statsAll = [], statsTab = 'res';
 const DAY = 86400000;
 const dayStart = t => { const d = new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
