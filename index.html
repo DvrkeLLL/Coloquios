@@ -136,6 +136,25 @@ h1{font-weight:900;font-size:32px;line-height:1.05;margin:6px 0 0;letter-spacing
 @keyframes stream{0%,74%{opacity:1;stroke-dashoffset:0}75%,100%{opacity:0;stroke-dashoffset:-6}}
 @media (prefers-reduced-motion: reduce){ .hourglass,.hourglass *{animation-duration:6s} .board.loading .n::after{animation:none} }
 
+/* Rifa completada */
+.donebox{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:10px}
+.board.full .donebox{display:flex}
+.board.full .grid{opacity:.35;filter:grayscale(.4);pointer-events:none}
+.pill.done{text-align:center;max-width:300px;gap:8px}
+.pill.done b{font-size:20px;font-weight:900;color:var(--ink)}
+.pill.done span{font-weight:700}
+.pill.done .goto{height:46px;padding:0 20px;margin-top:4px}
+.tro{width:56px;height:56px;border-radius:50%;background:#FFE9A8;color:#8A5A0F;display:grid;place-items:center}
+.tro svg{width:28px;height:28px}
+.switch button .ok{display:inline-block;width:16px;height:16px;margin-left:6px;vertical-align:-2px;color:var(--mine)}
+.alldone{margin:14px 20px 0;padding:22px 18px;border-radius:24px;background:var(--accentSoft);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.alldone[hidden]{display:none}
+.alldone b{font-size:22px;font-weight:900}
+.alldone span{font-size:14px;font-weight:700;color:var(--muted);line-height:1.45}
+.alldone .btn{margin-top:6px;text-decoration:none;padding:0 22px}
+body.all-full .dock{display:none}
+body.all-full .app{padding-bottom:40px}
+
 .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:13px;font-weight:600;color:var(--muted)}
 .legend span{display:flex;align-items:center;gap:8px}
 .legend i{width:16px;height:16px;border-radius:6px;display:inline-block}
@@ -381,6 +400,13 @@ textarea.inp{height:88px;padding:12px 16px;resize:none}
   <div class="offline" id="offline" hidden>
     <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
     La venta abrirá muy pronto
+  </div>
+
+  <div class="alldone" id="allDone" hidden>
+    <span class="tro"><svg class="i" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></span>
+    <b>¡Las dos rifas están completas!</b>
+    <span id="allDoneTxt"></span>
+    <a class="btn" id="allDoneLive" target="_blank" rel="noopener" hidden>Ver transmisión</a>
   </div>
 
   <div class="switch" role="tablist" aria-label="Rifas">
@@ -772,6 +798,14 @@ function buildPanels(){
         <div class="loader" role="status">
           <div class="pill">${HOURGLASS}<span>Cargando números…</span></div>
         </div>
+        <div class="donebox" role="status">
+          <div class="pill done">
+            <span class="tro"><svg class="i" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></span>
+            <b>¡${esc(r.nombre)} completada!</b>
+            <span>Se vendieron los ${TOTAL_NUMEROS} números. Gracias por apoyar.</span>
+            ${RIFAS.length > 1 ? `<button class="btn goto" data-to="${1-i}">Ir a ${esc(RIFAS[1-i].nombre)}</button>` : ''}
+          </div>
+        </div>
       </div>
       <div class="legend">
         <span><i style="background:var(--surface)"></i>Disponible</span>
@@ -808,7 +842,35 @@ function renderDock(){
   $('#buyBtn').disabled = total === 0;
 }
 
-function renderAll(){ RIFAS.forEach((_,i)=>renderGrid(i)); renderDock(); }
+function renderAll(){ RIFAS.forEach((_,i)=>renderGrid(i)); renderDock(); if (ready) updateFull(); }
+
+/* ================== RIFA COMPLETADA ================== */
+let prevFull = null;
+const CHECK_SM = '<svg class="i ok" viewBox="0 0 24 24" aria-label="completa"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>';
+function updateFull(){
+  const full = RIFAS.map(r => Object.keys(db.rifas[r.id].sold).length >= TOTAL_NUMEROS);
+  RIFAS.forEach((r,i) => {
+    const board = document.querySelector(`.panel[data-i="${i}"] .board`);
+    if (board) board.classList.toggle('full', full[i]);
+    $('#sw'+i).innerHTML = esc(r.nombre) + (full[i] ? CHECK_SM : '');
+  });
+  const all = full.every(Boolean);
+  document.body.classList.toggle('all-full', all);
+  $('#allDone').hidden = !all;
+  if (all){
+    $('#allDoneTxt').textContent = 'Gracias por apoyar a Coloquios. ' + (LIVE_FECHA ? `Nos vemos en el sorteo en vivo: ${LIVE_FECHA}.` : 'Pronto avisaremos la fecha del sorteo en vivo.');
+    const a = $('#allDoneLive'); a.hidden = !LIVE_URL; if (LIVE_URL) a.href = LIVE_URL;
+  }
+  // si la rifa que estás viendo se llenó (o ya estaba llena al abrir), te lleva a la otra
+  const otra = 1 - active;
+  const seLleno = prevFull === null ? full[active] : (full[active] && !prevFull[active]);
+  if (!all && seLleno && RIFAS[otra] && !full[otra]){
+    const msg = `${RIFAS[active].nombre} está completa; te llevamos a ${RIFAS[otra].nombre}`;
+    track.scrollTo({ left: otra * track.clientWidth, behavior:'smooth' });
+    toast(msg, 'check');
+  }
+  prevFull = full;
+}
 
 function setActive(i){
   active = i;
@@ -850,6 +912,8 @@ function needSeller(){
 
 /* ================== INTERACCIÓN ================== */
 $('#track').addEventListener('click', e => {
+  const go = e.target.closest('.goto');
+  if (go){ track.scrollTo({ left: +go.dataset.to * track.clientWidth, behavior:'smooth' }); return; }
   const rb = e.target.closest('.ranges button');
   if (rb){
     const i = +rb.parentNode.dataset.r; range[i] = +rb.dataset.k;
@@ -869,6 +933,7 @@ $('#track').addEventListener('click', e => {
 const track = $('#track');
 document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => track.scrollTo({ left: +b.dataset.go * track.clientWidth, behavior:'smooth' })));
 track.addEventListener('scroll', () => {
+  if (!track.clientWidth) return;
   const i = Math.round(track.scrollLeft / track.clientWidth);
   if (i !== active) setActive(i);
 }, { passive:true });
